@@ -1,0 +1,40 @@
+{
+	"schemaVersion": 1,
+	"id": "jerksteve",
+	"version": "${version}",
+	"name": "JerkSteve",
+	"description": "The most annoying mob, as seen in the viral memes",
+	"authors": [
+		"L33tfox"
+	],
+	"contact": {
+		"homepage": "https://linktree.com/l33tfox",
+		"sources": "https://github.com/L33tfx"
+	},
+	"license": "MIT",
+	"icon": "assets/jerksteve/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"com.l33tfox.jerksteve.JerkSteve"
+		],
+		"client": [
+			"com.l33tfox.jerksteve.JerkSteveClient"
+		],
+		"fabric-datagen": [
+			"com.l33tfox.jerksteve.JerkSteveDataGenerator"
+		]
+	},
+	"mixins": [
+		"jerksteve.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.15.11",
+		"minecraft": "~1.21",
+		"java": ">=21",
+		"fabric-api": "*"
+	},
+	"suggests": {
+		"another-mod": "*"
+	}
+}
