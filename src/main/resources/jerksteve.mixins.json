@@ -1,10 +1,11 @@
 {
-	"required": true,
-	"package": "com.l33tfox.jerksteve.mixin",
-	"compatibilityLevel": "JAVA_21",
-	"mixins": [
-	],
-	"injectors": {
-		"defaultRequire": 1
+  "required": true,
+  "package": "com.l33tfox.jerksteve.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "EggEntityMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
 	}
 }
