@@ -7,6 +7,8 @@ import net.minecraft.block.Blocks;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.mob.EndermanEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.sound.BlockSoundGroup;
+import net.minecraft.sound.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
@@ -41,11 +43,20 @@ public class JerkStevePlaceBlockGoal extends Goal {
         BlockPos blockPos2 = blockPos.down();
         BlockState blockState2 = world.getBlockState(blockPos2);
         BlockState blockState3 = Blocks.DIRT.getDefaultState();
+        BlockSoundGroup blockSoundGroup = blockState3.getSoundGroup();
         if (blockState3 != null) {
             blockState3 = Block.postProcessState(blockState3, jerkSteve.getWorld(), blockPos);
             if (canPlaceOn(world, blockPos, blockState3, blockState, blockState2, blockPos2)) {
                 world.setBlockState(blockPos, blockState3, Block.NOTIFY_ALL);
                 world.emitGameEvent(GameEvent.BLOCK_PLACE, blockPos, GameEvent.Emitter.of(jerkSteve, blockState3));
+                world.playSound(
+                        jerkSteve,
+                        blockPos,
+                        blockState3.getSoundGroup().getPlaceSound(),
+                        SoundCategory.BLOCKS,
+                        (blockSoundGroup.getVolume() + 1.0F) / 2.0F,
+                        blockSoundGroup.getPitch() * 0.8F
+                );
             }
         }
     }

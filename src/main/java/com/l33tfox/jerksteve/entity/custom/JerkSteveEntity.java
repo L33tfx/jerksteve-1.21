@@ -58,7 +58,7 @@ public class JerkSteveEntity extends HostileEntity implements RangedAttackMob, I
     protected void initGoals() {
         goalSelector.add(1, new JerkSteveProjectileAttackGoal<>(this, 1.0, 20, 15.0F));
         //goalSelector.add(1, new BowAttackGoal<>(this, 1.0, 20, 15.0F));
-        //goalSelector.add(1, new JerkStevePlaceBlockGoal(this));
+        goalSelector.add(1, new JerkStevePlaceBlockGoal(this));
         goalSelector.add(1, new JerkSteveBreakBlockGoal(this, 2));
         goalSelector.add(1, new SwimGoal(this));
         goalSelector.add(3, new FleeEntityGoal<>(this, PlayerEntity.class, 6.0F, 0.1, 0.13));
