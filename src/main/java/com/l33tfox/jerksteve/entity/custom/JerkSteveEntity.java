@@ -22,6 +22,7 @@ import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.LocalDifficulty;
 import net.minecraft.world.ServerWorldAccess;
@@ -124,6 +125,17 @@ public class JerkSteveEntity extends HostileEntity implements RangedAttackMob, I
         super.tick();
     }
 
+    public void lookAtBlockBelowEntity(Entity targetEntity) {
+        lookAtEntity(targetEntity, 30.0F, 30.0F);
+
+        double d = targetEntity.getX() - this.getX();
+        double e = targetEntity.getZ() - this.getZ();
+        double f = targetEntity.getBlockY() - this.getEyeY();
+        double g = Math.sqrt(d * d + e * e);
+
+        float i = (float)(-(MathHelper.atan2(f, g) * 180.0F / (float)Math.PI));
+        this.setPitch(changeAngle(this.getPitch(), i, 30.0F));
+    }
 
     @Override
     public void shootAt(LivingEntity target, float pullProgress) {
