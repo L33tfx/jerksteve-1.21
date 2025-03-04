@@ -5,11 +5,17 @@ import com.l33tfox.jerksteve.entity.custom.JerkSteveEntity;
 import net.minecraft.client.model.*;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.entity.model.BipedEntityModel;
+import net.minecraft.client.render.entity.model.CrossbowPosing;
 import net.minecraft.client.render.entity.model.EntityModel;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.util.Arm;
+import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.MathHelper;
 
 public class JerkSteveModel<T extends JerkSteveEntity> extends BipedEntityModel<T> {
 
@@ -48,5 +54,50 @@ public class JerkSteveModel<T extends JerkSteveEntity> extends BipedEntityModel<
         rightArm.render(matrices, vertices, light, overlay, color);
         leftLeg.render(matrices, vertices, light, overlay, color);
         rightLeg.render(matrices, vertices, light, overlay, color);
+    }
+
+    // copied from skeletonentitymodel
+    public void animateModel(T mobEntity, float f, float g, float h) {
+        this.rightArmPose = BipedEntityModel.ArmPose.EMPTY;
+        this.leftArmPose = BipedEntityModel.ArmPose.EMPTY;
+        ItemStack itemStack = mobEntity.getStackInHand(Hand.MAIN_HAND);
+        if (itemStack.isOf(Items.BOW) && mobEntity.isAttacking()) {
+            if (mobEntity.getMainArm() == Arm.RIGHT) {
+                this.rightArmPose = BipedEntityModel.ArmPose.BOW_AND_ARROW;
+            } else {
+                this.leftArmPose = BipedEntityModel.ArmPose.BOW_AND_ARROW;
+            }
+        }
+
+        super.animateModel(mobEntity, f, g, h);
+    }
+
+    // copied from skeletonentitymodel
+    public void setAngles(T mobEntity, float f, float g, float h, float i, float j) {
+        super.setAngles(mobEntity, f, g, h, i, j);
+        ItemStack itemStack = mobEntity.getMainHandStack();
+        if (mobEntity.isAttacking() && (itemStack.isEmpty() || !itemStack.isOf(Items.BOW))) {
+            float k = MathHelper.sin(this.handSwingProgress * (float) Math.PI);
+            float l = MathHelper.sin((1.0F - (1.0F - this.handSwingProgress) * (1.0F - this.handSwingProgress)) * (float) Math.PI);
+            this.rightArm.roll = 0.0F;
+            this.leftArm.roll = 0.0F;
+            this.rightArm.yaw = -(0.1F - k * 0.6F);
+            this.leftArm.yaw = 0.1F - k * 0.6F;
+            this.rightArm.pitch = (float) (-Math.PI / 2);
+            this.leftArm.pitch = (float) (-Math.PI / 2);
+            this.rightArm.pitch -= k * 1.2F - l * 0.4F;
+            this.leftArm.pitch -= k * 1.2F - l * 0.4F;
+            CrossbowPosing.swingArms(this.rightArm, this.leftArm, h);
+        }
+    }
+
+    // copied from skeletonentitymodel
+    @Override
+    public void setArmAngle(Arm arm, MatrixStack matrices) {
+        float f = arm == Arm.RIGHT ? 1.0F : -1.0F;
+        ModelPart modelPart = this.getArm(arm);
+        modelPart.pivotX += f;
+        modelPart.rotate(matrices);
+        modelPart.pivotX -= f;
     }
 }

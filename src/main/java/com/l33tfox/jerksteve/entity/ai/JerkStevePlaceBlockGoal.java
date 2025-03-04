@@ -4,9 +4,12 @@ import com.l33tfox.jerksteve.entity.custom.JerkSteveEntity;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.mob.EndermanEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.util.math.BlockPos;
@@ -21,6 +24,7 @@ import net.minecraft.world.event.GameEvent;
 public class JerkStevePlaceBlockGoal extends Goal {
     private final JerkSteveEntity jerkSteve;
     private PlayerEntity target;
+    private BlockState blockState3 = Blocks.DIRT.getDefaultState();
 
     public JerkStevePlaceBlockGoal(JerkSteveEntity jerkSteve) {
         this.jerkSteve = jerkSteve;
@@ -28,9 +32,11 @@ public class JerkStevePlaceBlockGoal extends Goal {
 
     @Override
     public boolean canStart() {
+        jerkSteve.equipStack(EquipmentSlot.MAINHAND, new ItemStack(blockState3.getBlock()));
         return jerkSteve.getWorld().getGameRules().getBoolean(GameRules.DO_MOB_GRIEFING);
     }
 
+    // adapted from enderman's placeblockgoal
     @Override
     public void tick() {
         Random random = jerkSteve.getRandom();
@@ -42,7 +48,6 @@ public class JerkStevePlaceBlockGoal extends Goal {
         BlockState blockState = world.getBlockState(blockPos);
         BlockPos blockPos2 = blockPos.down();
         BlockState blockState2 = world.getBlockState(blockPos2);
-        BlockState blockState3 = Blocks.DIRT.getDefaultState();
         BlockSoundGroup blockSoundGroup = blockState3.getSoundGroup();
         if (blockState3 != null) {
             blockState3 = Block.postProcessState(blockState3, jerkSteve.getWorld(), blockPos);
@@ -67,6 +72,6 @@ public class JerkStevePlaceBlockGoal extends Goal {
                 && !state.isOf(Blocks.BEDROCK)
                 && state.isFullCube(world, pos)
                 && carriedState.canPlaceAt(world, posAbove)
-                && world.getOtherEntities(jerkSteve, Box.from(Vec3d.of(posAbove))).isEmpty();
+                && world.getOtherEntities(null, Box.from(Vec3d.of(posAbove))).isEmpty();
     }
 }

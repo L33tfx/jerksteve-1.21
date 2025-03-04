@@ -3,12 +3,13 @@ package com.l33tfox.jerksteve.entity.client;
 import com.l33tfox.jerksteve.JerkSteve;
 import com.l33tfox.jerksteve.entity.custom.JerkSteveEntity;
 import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.entity.BipedEntityRenderer;
 import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.render.entity.MobEntityRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 
-public class JerkSteveRenderer extends MobEntityRenderer<JerkSteveEntity, JerkSteveModel<JerkSteveEntity>> {
+public class JerkSteveRenderer extends BipedEntityRenderer<JerkSteveEntity, JerkSteveModel<JerkSteveEntity>> {
 
     public JerkSteveRenderer(EntityRendererFactory.Context context) {
         super(context, new JerkSteveModel<>(context.getPart(JerkSteveModel.JERKSTEVE)), 0.5f);

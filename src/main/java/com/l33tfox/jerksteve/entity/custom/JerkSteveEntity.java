@@ -1,32 +1,34 @@
 package com.l33tfox.jerksteve.entity.custom;
 
+import com.l33tfox.jerksteve.entity.ai.JerkSteveBowAttackGoal;
 import com.l33tfox.jerksteve.entity.ai.JerkSteveBreakBlockGoal;
+import com.l33tfox.jerksteve.entity.ai.JerkSteveEggAttackGoal;
 import com.l33tfox.jerksteve.entity.ai.JerkStevePlaceBlockGoal;
-import com.l33tfox.jerksteve.entity.ai.JerkSteveProjectileAttackGoal;
-import net.minecraft.block.AbstractBlock;
-import net.minecraft.block.AnvilBlock;
-import net.minecraft.block.Block;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.RangedAttackMob;
 import net.minecraft.entity.ai.goal.*;
+import net.minecraft.entity.attribute.ClampedEntityAttribute;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
+import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.mob.*;
-import net.minecraft.entity.passive.WolfEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.PersistentProjectileEntity;
 import net.minecraft.entity.projectile.ProjectileUtil;
 import net.minecraft.entity.projectile.thrown.EggEntity;
-import net.minecraft.entity.projectile.thrown.SnowballEntity;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.*;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.collection.DefaultedList;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.LocalDifficulty;
 import net.minecraft.world.ServerWorldAccess;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.EnumSet;
 
 public class JerkSteveEntity extends HostileEntity implements RangedAttackMob, InventoryOwner {
 
@@ -47,19 +49,36 @@ public class JerkSteveEntity extends HostileEntity implements RangedAttackMob, I
     public JerkSteveEntity(EntityType<? extends HostileEntity> entityType, World world) {
         super(entityType, world);
 
-        //inventory.addStack(itemStacks[0]);
-
         for (ItemStack stack : itemStacks) {
             inventory.addStack(stack);
         }
     }
 
+    // copied from playerentity class
+    public double getBlockInteractionRange() {
+        return this.getAttributeValue(EntityAttributes.PLAYER_BLOCK_INTERACTION_RANGE);
+    }
+
+    // copied from playerentity class
+    public boolean canInteractWithBlockAt(BlockPos pos, double additionalRange) {
+        double d = this.getBlockInteractionRange() + additionalRange;
+        return new Box(pos).squaredMagnitude(this.getEyePos()) < d * d;
+    }
+
     @Override
     protected void initGoals() {
-        goalSelector.add(1, new JerkSteveProjectileAttackGoal<>(this, 1.0, 20, 15.0F));
-        //goalSelector.add(1, new BowAttackGoal<>(this, 1.0, 20, 15.0F));
-        goalSelector.add(1, new JerkStevePlaceBlockGoal(this));
-        goalSelector.add(1, new JerkSteveBreakBlockGoal(this, 2));
+        JerkSteveEggAttackGoal<JerkSteveEntity> shootEggGoal = new JerkSteveEggAttackGoal<>(this, 1.0, 20, 15.0F);
+        shootEggGoal.setControls(EnumSet.of(Goal.Control.LOOK, Goal.Control.MOVE));
+//        goalSelector.add(1, shootEggGoal);
+        JerkSteveBowAttackGoal<JerkSteveEntity> shootBowGoal = new JerkSteveBowAttackGoal<>(this, 1.0, 20, 15.0F);
+        shootBowGoal.setControls(EnumSet.of(Goal.Control.LOOK, Goal.Control.MOVE));
+//        goalSelector.add(1, shootBowGoal);
+        JerkStevePlaceBlockGoal placeBlockGoal = new JerkStevePlaceBlockGoal(this);
+        placeBlockGoal.setControls(EnumSet.of(Goal.Control.LOOK, Goal.Control.MOVE));
+//        goalSelector.add(1, placeBlockGoal);
+        JerkSteveBreakBlockGoal breakBlockGoal = new JerkSteveBreakBlockGoal(this, 2);
+        breakBlockGoal.setControls(EnumSet.of(Goal.Control.LOOK, Goal.Control.MOVE));
+        goalSelector.add(1, breakBlockGoal);
         goalSelector.add(1, new SwimGoal(this));
         goalSelector.add(3, new FleeEntityGoal<>(this, PlayerEntity.class, 6.0F, 0.1, 0.13));
         goalSelector.add(5, new WanderNearTargetGoal(this, 0.1, 32.0F));
@@ -72,9 +91,14 @@ public class JerkSteveEntity extends HostileEntity implements RangedAttackMob, I
     public static DefaultAttributeContainer.Builder createAttributes() {
         return MobEntity.createMobAttributes()
                 .add(EntityAttributes.GENERIC_MAX_HEALTH, 20)
-                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.35)
+                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.1F)
                 .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 1)
-                .add(EntityAttributes.GENERIC_FOLLOW_RANGE, 20);
+                .add(EntityAttributes.GENERIC_FOLLOW_RANGE, 20)
+                .add(EntityAttributes.PLAYER_BLOCK_INTERACTION_RANGE, 4.5)
+                .add(EntityAttributes.PLAYER_ENTITY_INTERACTION_RANGE, 3.0)
+                .add(EntityAttributes.PLAYER_BLOCK_BREAK_SPEED)
+                .add(EntityAttributes.PLAYER_SUBMERGED_MINING_SPEED)
+                .add(EntityAttributes.PLAYER_SNEAKING_SPEED);
     }
 
     @Nullable
@@ -92,7 +116,7 @@ public class JerkSteveEntity extends HostileEntity implements RangedAttackMob, I
     @Override
     protected void initEquipment(Random random, LocalDifficulty localDifficulty) {
         super.initEquipment(random, localDifficulty);
-        //equipStack(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
+        equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.BOW));
     }
 
     @Override
@@ -105,7 +129,10 @@ public class JerkSteveEntity extends HostileEntity implements RangedAttackMob, I
     public void shootAt(LivingEntity target, float pullProgress) {
         double random = Math.random();
         if (random >= 0.5) { // shoot arrow - copied from abstractskeletonentity class
-            equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.BOW));
+            if (!activeItemStack.getItem().equals(Items.BOW)) {
+                equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.BOW));
+            }
+//        if (getMainHandStack().getItem().equals(Items.BOW)) {
             ItemStack itemStack = this.getStackInHand(ProjectileUtil.getHandPossiblyHolding(this, Items.BOW));
             ItemStack itemStack2 = this.getProjectileType(itemStack);
             PersistentProjectileEntity persistentProjectileEntity = this.createArrowProjectile(itemStack2, pullProgress, itemStack);
