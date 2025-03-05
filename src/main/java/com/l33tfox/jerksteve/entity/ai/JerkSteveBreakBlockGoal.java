@@ -24,7 +24,7 @@ import net.minecraft.world.WorldEvents;
 
 import java.util.function.Predicate;
 
-public class JerkSteveBreakBlockGoal extends Goal {
+public class JerkSteveBreakBlockGoal extends Goal implements JerkSteveAttackGoal {
 
     private final JerkSteveEntity jerkSteve;
     private static final int MIN_MAX_PROGRESS = 240;

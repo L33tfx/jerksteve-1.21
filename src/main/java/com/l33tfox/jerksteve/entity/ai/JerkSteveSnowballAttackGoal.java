@@ -10,13 +10,15 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.math.BlockPos;
 
-public class JerkSteveSnowballAttackGoal<T extends HostileEntity & RangedAttackMob> extends ProjectileAttackGoal {
+public class JerkSteveSnowballAttackGoal<T extends HostileEntity & RangedAttackMob> extends ProjectileAttackGoal implements JerkSteveAttackGoal {
 
     private final T jerkSteve;
+    private final float range;
 
     public JerkSteveSnowballAttackGoal(T actor, double speed, int attackInterval, float range) {
         super(actor, speed, attackInterval, range);
         jerkSteve = actor;
+        this.range = range;
     }
 
     @Override
@@ -27,10 +29,17 @@ public class JerkSteveSnowballAttackGoal<T extends HostileEntity & RangedAttackM
 
     @Override
     public boolean canStart() {
+        LivingEntity target = jerkSteve.getTarget();
         return super.canStart()
-                && jerkSteve.getTarget() != null
-                && jerkSteve.getTarget().getHealth() >= JerkSteveUtil.bowAttackHealthThreshold
+                && target != null
+                && target.getHealth() >= JerkSteveUtil.bowAttackHealthThreshold
+                && jerkSteve.squaredDistanceTo(target.getX(), target.getY(), target.getZ()) <= range * range
                 && isTargetNearDrop();
+    }
+
+    @Override
+    public boolean shouldContinue() {
+        return this.canStart();
     }
 
     public boolean isTargetNearDrop() {
@@ -45,7 +54,7 @@ public class JerkSteveSnowballAttackGoal<T extends HostileEntity & RangedAttackM
                 BlockPos blockPos = JerkSteveUtil.posXBelow(target, xDisplace, 1, zDisplace);
                 if (JerkSteveUtil.isNotCollidable(jerkSteve.getWorld().getBlockState(blockPos))) {
                     BlockPos blockPos2 = JerkSteveUtil.posXBelow(target, xDisplace, 2, zDisplace);
-                    if (JerkSteveUtil.isNotCollidable(jerkSteve.getWorld().getBlockState(blockPos2))) {
+                    if (!jerkSteve.getWorld().getBlockState(blockPos).isAir() || JerkSteveUtil.isNotCollidable(jerkSteve.getWorld().getBlockState(blockPos2))) {
                         return true;
                     }
                 }

@@ -1,9 +1,6 @@
 package com.l33tfox.jerksteve.entity.custom;
 
-import com.l33tfox.jerksteve.entity.ai.JerkSteveBowAttackGoal;
-import com.l33tfox.jerksteve.entity.ai.JerkSteveBreakBlockGoal;
-import com.l33tfox.jerksteve.entity.ai.JerkSteveSnowballAttackGoal;
-import com.l33tfox.jerksteve.entity.ai.JerkStevePlaceBlockGoal;
+import com.l33tfox.jerksteve.entity.ai.*;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.RangedAttackMob;
 import net.minecraft.entity.ai.goal.*;
@@ -26,6 +23,7 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumSet;
+import java.util.Set;
 
 public class JerkSteveEntity extends HostileEntity implements RangedAttackMob, InventoryOwner {
 
@@ -62,11 +60,23 @@ public class JerkSteveEntity extends HostileEntity implements RangedAttackMob, I
         return new Box(pos).squaredMagnitude(this.getEyePos()) < d * d;
     }
 
+    public boolean canAttackGoalStart() {
+        Set<PrioritizedGoal> goals = goalSelector.getGoals();
+
+        for (PrioritizedGoal goal : goals) {
+            if (goal instanceof JerkSteveAttackGoal && goal.canStart()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     @Override
     protected void initGoals() {
-        JerkSteveSnowballAttackGoal<JerkSteveEntity> shootEggGoal = new JerkSteveSnowballAttackGoal<>(this, 1.0, 20, 15.0F);
-        shootEggGoal.setControls(EnumSet.of(Goal.Control.LOOK, Goal.Control.MOVE));
-        goalSelector.add(1, shootEggGoal);
+        JerkSteveSnowballAttackGoal<JerkSteveEntity> shootSnowballGoal = new JerkSteveSnowballAttackGoal<>(this, 1.0, 20, 15.0F);
+        shootSnowballGoal.setControls(EnumSet.of(Goal.Control.LOOK, Goal.Control.MOVE));
+        goalSelector.add(1, shootSnowballGoal);
         JerkSteveBowAttackGoal<JerkSteveEntity> shootBowGoal = new JerkSteveBowAttackGoal<>(this, 1.0, 20, 15.0F);
         shootBowGoal.setControls(EnumSet.of(Goal.Control.LOOK, Goal.Control.MOVE));
         goalSelector.add(1, shootBowGoal);
@@ -76,14 +86,17 @@ public class JerkSteveEntity extends HostileEntity implements RangedAttackMob, I
         JerkSteveBreakBlockGoal breakBlockGoal = new JerkSteveBreakBlockGoal(this, 2);
         breakBlockGoal.setControls(EnumSet.of(Goal.Control.LOOK, Goal.Control.MOVE));
         goalSelector.add(0, breakBlockGoal);
+        JerkSteveFollowTargetGoal followTargetGoal= new JerkSteveFollowTargetGoal(this, 3, 15.0F);
+        followTargetGoal.setControls(EnumSet.of(Goal.Control.LOOK, Goal.Control.MOVE));
+        goalSelector.add(2, followTargetGoal);
         goalSelector.add(1, new SwimGoal(this));
-        goalSelector.add(3, new FleeEntityGoal<>(this, PlayerEntity.class, 6.0F, 0.1, 0.13));
-        goalSelector.add(5, new WanderNearTargetGoal(this, 0.1, 32.0F));
-        goalSelector.add(5, new WanderAroundFarGoal(this, 1.0));
+//        goalSelector.add(3, new FleeEntityGoal<>(this, PlayerEntity.class, 6.0F, 0.1, 0.13));
+//        goalSelector.add(5, new WanderNearTargetGoal(this, 3, 20.0F));
+//        goalSelector.add(5, new WanderAroundFarGoal(this, 1.0));
         LookAtEntityGoal lookAtPlayerGoal = new LookAtEntityGoal(this, PlayerEntity.class, 20.0F);
         lookAtPlayerGoal.setControls(EnumSet.of(Goal.Control.LOOK));
-        goalSelector.add(6, lookAtPlayerGoal);
-        goalSelector.add(6, new LookAroundGoal(this));
+//        goalSelector.add(6, lookAtPlayerGoal);
+//        goalSelector.add(6, new LookAroundGoal(this));
         targetSelector.add(0, new ActiveTargetGoal<>(this, PlayerEntity.class, true));
     }
 
