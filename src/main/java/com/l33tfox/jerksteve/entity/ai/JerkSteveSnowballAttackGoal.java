@@ -7,11 +7,11 @@ import net.minecraft.entity.mob.HostileEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 
-public class JerkSteveEggAttackGoal<T extends HostileEntity & RangedAttackMob> extends ProjectileAttackGoal {
+public class JerkSteveSnowballAttackGoal<T extends HostileEntity & RangedAttackMob> extends ProjectileAttackGoal {
 
     private final T jerkSteve;
 
-    public JerkSteveEggAttackGoal(T actor, double speed, int attackInterval, float range) {
+    public JerkSteveSnowballAttackGoal(T actor, double speed, int attackInterval, float range) {
         super(actor, speed, attackInterval, range);
         jerkSteve = actor;
     }
@@ -19,7 +19,7 @@ public class JerkSteveEggAttackGoal<T extends HostileEntity & RangedAttackMob> e
     @Override
     public void start() {
         super.start();
-        jerkSteve.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.EGG));
+        jerkSteve.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.SNOWBALL));
     }
 
     @Override

@@ -1,30 +1,24 @@
 package com.l33tfox.jerksteve.entity.custom;
 
-import com.l33tfox.jerksteve.JerkSteve;
 import com.l33tfox.jerksteve.entity.ai.JerkSteveBowAttackGoal;
 import com.l33tfox.jerksteve.entity.ai.JerkSteveBreakBlockGoal;
-import com.l33tfox.jerksteve.entity.ai.JerkSteveEggAttackGoal;
+import com.l33tfox.jerksteve.entity.ai.JerkSteveSnowballAttackGoal;
 import com.l33tfox.jerksteve.entity.ai.JerkStevePlaceBlockGoal;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.RangedAttackMob;
 import net.minecraft.entity.ai.goal.*;
-import net.minecraft.entity.attribute.ClampedEntityAttribute;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
-import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.mob.*;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.PersistentProjectileEntity;
 import net.minecraft.entity.projectile.ProjectileUtil;
-import net.minecraft.entity.projectile.thrown.EggEntity;
+import net.minecraft.entity.projectile.thrown.SnowballEntity;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.*;
-import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.LocalDifficulty;
 import net.minecraft.world.ServerWorldAccess;
@@ -70,7 +64,7 @@ public class JerkSteveEntity extends HostileEntity implements RangedAttackMob, I
 
     @Override
     protected void initGoals() {
-        JerkSteveEggAttackGoal<JerkSteveEntity> shootEggGoal = new JerkSteveEggAttackGoal<>(this, 1.0, 20, 15.0F);
+        JerkSteveSnowballAttackGoal<JerkSteveEntity> shootEggGoal = new JerkSteveSnowballAttackGoal<>(this, 1.0, 20, 15.0F);
         shootEggGoal.setControls(EnumSet.of(Goal.Control.LOOK, Goal.Control.MOVE));
         goalSelector.add(1, shootEggGoal);
         JerkSteveBowAttackGoal<JerkSteveEntity> shootBowGoal = new JerkSteveBowAttackGoal<>(this, 1.0, 20, 15.0F);
@@ -143,16 +137,16 @@ public class JerkSteveEntity extends HostileEntity implements RangedAttackMob, I
             this.playSound(SoundEvents.ENTITY_SKELETON_SHOOT, 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
             this.getWorld().spawnEntity(persistentProjectileEntity);
         } else { // shoot egg - copied from snowgolementity class mostly
-            equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.EGG));
-            EggEntity eggEntity = new EggEntity(this.getWorld(), this);
+            equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.SNOWBALL));
+            SnowballEntity snowballEntity = new SnowballEntity(this.getWorld(), this);
             double d = target.getEyeY() - 1.1F;
             double e = target.getX() - this.getX();
-            double f = d - eggEntity.getY();
+            double f = d - snowballEntity.getY();
             double g = target.getZ() - this.getZ();
             double h = Math.sqrt(e * e + g * g) * 0.2F;
-            eggEntity.setVelocity(e, f + h, g, 1.6F, 1.0F);
-            this.playSound(SoundEvents.ENTITY_EGG_THROW, 1.0F, 0.4F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
-            this.getWorld().spawnEntity(eggEntity);
+            snowballEntity.setVelocity(e, f + h, g, 1.6F, 1.0F);
+            this.playSound(SoundEvents.ENTITY_SNOWBALL_THROW, 1.0F, 0.4F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
+            this.getWorld().spawnEntity(snowballEntity);
         }
     }
 
