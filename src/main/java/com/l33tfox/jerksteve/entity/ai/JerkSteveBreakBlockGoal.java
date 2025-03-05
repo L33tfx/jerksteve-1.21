@@ -5,6 +5,7 @@ import com.l33tfox.jerksteve.entity.custom.JerkSteveEntity;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -42,6 +43,14 @@ public class JerkSteveBreakBlockGoal extends Goal {
         }
     }
 
+    private BlockPos posXBelow(LivingEntity target, int x) {
+        if (target == null) {
+            return null;
+        }
+
+        return new BlockPos(roundToBlock(target.getX()), roundToBlock(target.getY() - x), roundToBlock(target.getZ()));
+    }
+
     @Override
     public boolean canStart() {
         if (jerkSteve.getTarget() == null) {
@@ -49,7 +58,7 @@ public class JerkSteveBreakBlockGoal extends Goal {
         }
 
         boolean canSpleef = false;
-        BlockPos pos2Below = new BlockPos(roundToBlock(jerkSteve.getTarget().getX()), roundToBlock(jerkSteve.getTarget().getY() - 2), roundToBlock(jerkSteve.getTarget().getZ()));
+        BlockPos pos2Below = posXBelow(jerkSteve.getTarget(), 2);
 
         if (jerkSteve.getTarget().isOnGround() && jerkSteve.getWorld().getBlockState(pos2Below).isAir()) {
             canSpleef = true;
@@ -73,7 +82,8 @@ public class JerkSteveBreakBlockGoal extends Goal {
     public boolean shouldContinue() {
         return this.breakProgress <= this.getMaxProgress() && !jerkSteve.getWorld().getBlockState(posBelowTarget).isAir()
                 && !jerkSteve.getWorld().getBlockState(posBelowTarget).isOf(Blocks.BEDROCK)
-                && jerkSteve.canInteractWithBlockAt(posBelowTarget, 0);
+                && jerkSteve.canInteractWithBlockAt(posBelowTarget, 0)
+                && (posBelowTarget.equals(posXBelow(jerkSteve.getTarget(), 1)) || posBelowTarget.equals(posXBelow(jerkSteve.getTarget(), 2)) || posBelowTarget.equals(posXBelow(jerkSteve.getTarget(), 3)));
     }
 
     @Override
@@ -84,14 +94,12 @@ public class JerkSteveBreakBlockGoal extends Goal {
     // adapted from breakdoorgoal class - pretty scuffed and hardcoded
     @Override
     public void tick() {
-        super.tick();
-
         if (posBelowTarget == null || !shouldContinue()) {
             return;
         }
 
-        jerkSteve.lookAtEntity(jerkSteve.getTarget(), 30.0F, 30.0F);
-        jerkSteve.getLookControl().lookAt(jerkSteve.getTarget(), 30.0F, 30.0F);
+        jerkSteve.getLookControl().lookAt(jerkSteve.getTarget().getX(), jerkSteve.getTarget().getBlockY() - 0.5F,
+                jerkSteve.getTarget().getZ(), 30.0F, 30.0F);
 
         if (!jerkSteve.handSwinging) {
             jerkSteve.swingHand(jerkSteve.getActiveHand());

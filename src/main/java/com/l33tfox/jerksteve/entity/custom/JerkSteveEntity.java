@@ -1,5 +1,6 @@
 package com.l33tfox.jerksteve.entity.custom;
 
+import com.l33tfox.jerksteve.JerkSteve;
 import com.l33tfox.jerksteve.entity.ai.JerkSteveBowAttackGoal;
 import com.l33tfox.jerksteve.entity.ai.JerkSteveBreakBlockGoal;
 import com.l33tfox.jerksteve.entity.ai.JerkSteveEggAttackGoal;
@@ -20,6 +21,7 @@ import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.*;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
@@ -84,7 +86,9 @@ public class JerkSteveEntity extends HostileEntity implements RangedAttackMob, I
         goalSelector.add(3, new FleeEntityGoal<>(this, PlayerEntity.class, 6.0F, 0.1, 0.13));
         goalSelector.add(5, new WanderNearTargetGoal(this, 0.1, 32.0F));
         goalSelector.add(5, new WanderAroundFarGoal(this, 1.0));
-        goalSelector.add(6, new LookAtEntityGoal(this, PlayerEntity.class, 20.0F));
+        LookAtEntityGoal lookAtPlayerGoal = new LookAtEntityGoal(this, PlayerEntity.class, 20.0F);
+        lookAtPlayerGoal.setControls(EnumSet.of(Goal.Control.LOOK));
+        goalSelector.add(6, lookAtPlayerGoal);
         goalSelector.add(6, new LookAroundGoal(this));
         targetSelector.add(0, new ActiveTargetGoal<>(this, PlayerEntity.class, true));
     }
@@ -130,7 +134,7 @@ public class JerkSteveEntity extends HostileEntity implements RangedAttackMob, I
 
         double d = targetEntity.getX() - this.getX();
         double e = targetEntity.getZ() - this.getZ();
-        double f = targetEntity.getBlockY() - this.getEyeY();
+        double f = targetEntity.getBlockY() - this.getEyeY() - 1.5F;
         double g = Math.sqrt(d * d + e * e);
 
         float i = (float)(-(MathHelper.atan2(f, g) * 180.0F / (float)Math.PI));
