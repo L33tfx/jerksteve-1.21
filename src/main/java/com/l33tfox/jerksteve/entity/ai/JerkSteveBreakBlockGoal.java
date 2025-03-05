@@ -14,6 +14,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.random.Random;
@@ -40,22 +41,6 @@ public class JerkSteveBreakBlockGoal extends Goal {
         return Math.max(40, this.maxProgress);
     }
 
-    private int roundToBlock(double coord) {
-        if (coord >= 0) {
-            return (int) Math.ceil(coord);
-        } else {
-            return (int) Math.floor(coord);
-        }
-    }
-
-    private BlockPos posXBelow(LivingEntity target, int x) {
-        if (target == null) {
-            return null;
-        }
-
-        return new BlockPos(roundToBlock(target.getX()), roundToBlock(target.getY() - x), roundToBlock(target.getZ()));
-    }
-
     @Override
     public boolean canStart() {
         if (jerkSteve.getTarget() == null) {
@@ -63,9 +48,11 @@ public class JerkSteveBreakBlockGoal extends Goal {
         }
 
         boolean canSpleef = false;
-        BlockPos pos2Below = posXBelow(jerkSteve.getTarget(), 2);
+        BlockPos pos2Below = JerkSteveUtil.posXBelow(jerkSteve.getTarget(), 2);
 
-        if (jerkSteve.getTarget().isOnGround() && jerkSteve.getWorld().getBlockState(pos2Below).isAir()) {
+        BlockState state2Below = jerkSteve.getWorld().getBlockState(pos2Below);
+
+        if (jerkSteve.getTarget().isOnGround() && JerkSteveUtil.isNotCollidable(state2Below)) {
             canSpleef = true;
         }
 
@@ -83,7 +70,9 @@ public class JerkSteveBreakBlockGoal extends Goal {
         return this.breakProgress <= this.getMaxProgress() && !jerkSteve.getWorld().getBlockState(posBelowTarget).isAir()
                 && !jerkSteve.getWorld().getBlockState(posBelowTarget).isOf(Blocks.BEDROCK)
                 && jerkSteve.canInteractWithBlockAt(posBelowTarget, 0)
-                && (posBelowTarget.equals(posXBelow(jerkSteve.getTarget(), 1)) || posBelowTarget.equals(posXBelow(jerkSteve.getTarget(), 2)) || posBelowTarget.equals(posXBelow(jerkSteve.getTarget(), 3)));
+                && (posBelowTarget.equals(JerkSteveUtil.posXBelow(jerkSteve.getTarget(), 1)) ||
+                posBelowTarget.equals(JerkSteveUtil.posXBelow(jerkSteve.getTarget(), 2)) ||
+                posBelowTarget.equals(JerkSteveUtil.posXBelow(jerkSteve.getTarget(), 3)));
     }
 
     @Override

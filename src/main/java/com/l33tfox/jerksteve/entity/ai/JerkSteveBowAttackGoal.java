@@ -1,5 +1,6 @@
 package com.l33tfox.jerksteve.entity.ai;
 
+import com.l33tfox.jerksteve.entity.util.JerkSteveUtil;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.ai.RangedAttackMob;
 import net.minecraft.entity.ai.goal.BowAttackGoal;
@@ -24,7 +25,7 @@ public class JerkSteveBowAttackGoal<T extends HostileEntity & RangedAttackMob> e
 
     @Override
     public boolean canStart() {
-        return jerkSteve.getTarget() != null && jerkSteve.getTarget().getHealth() < 5.0F;
+        return jerkSteve.getTarget() != null && jerkSteve.getTarget().getHealth() < JerkSteveUtil.bowAttackHealthThreshold;
     }
 
     @Override
