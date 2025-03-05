@@ -35,25 +35,25 @@ import java.util.EnumSet;
 
 public class JerkSteveEntity extends HostileEntity implements RangedAttackMob, InventoryOwner {
 
-    private final Item.Settings settings = new Item.Settings();
+    private static final Item.Settings settings = new Item.Settings();
     public final SimpleInventory inventory = new SimpleInventory(9);
 
-    private final ItemStack[] itemStacks = {
-            new ItemStack(Items.BOW),
-            new ItemStack(Items.ARROW),
-            new ItemStack(Items.ANVIL),
-            new ItemStack(Items.EGG),
-            new ItemStack(Items.SHEARS),
-            new ItemStack(Items.DIAMOND_AXE),
-            new ItemStack(Items.DIAMOND_PICKAXE),
-            new ItemStack(Items.DIAMOND_SHOVEL)
+    public static final Item[] items = {
+            Items.BOW,
+            Items.ARROW,
+            Items.ANVIL,
+            Items.EGG,
+            Items.SHEARS,
+            Items.DIAMOND_AXE,
+            Items.DIAMOND_PICKAXE,
+            Items.DIAMOND_SHOVEL
     };
 
     public JerkSteveEntity(EntityType<? extends HostileEntity> entityType, World world) {
         super(entityType, world);
 
-        for (ItemStack stack : itemStacks) {
-            inventory.addStack(stack);
+        for (Item item : items) {
+            inventory.addStack(new ItemStack(item));
         }
     }
 

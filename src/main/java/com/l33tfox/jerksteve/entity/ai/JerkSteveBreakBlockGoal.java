@@ -2,13 +2,18 @@ package com.l33tfox.jerksteve.entity.ai;
 
 import com.l33tfox.jerksteve.JerkSteve;
 import com.l33tfox.jerksteve.entity.custom.JerkSteveEntity;
+import com.l33tfox.jerksteve.entity.util.JerkSteveUtil;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.random.Random;
@@ -70,11 +75,6 @@ public class JerkSteveBreakBlockGoal extends Goal {
 
     @Override
     public void start() {
-//        Random random = jerkSteve.getRandom();
-//        int i = MathHelper.floor(jerkSteve.getX() - 1.0 + random.nextDouble() * 2.0);
-//        int j = MathHelper.floor(jerkSteve.getY() + random.nextDouble() * 2.0);
-//        int k = MathHelper.floor(jerkSteve.getZ() - 1.0 + random.nextDouble() * 2.0);
-//        blockPos = new BlockPos(i, j, k);
         this.breakProgress = 0;
     }
 
@@ -101,6 +101,9 @@ public class JerkSteveBreakBlockGoal extends Goal {
         jerkSteve.getLookControl().lookAt(jerkSteve.getTarget().getX(), jerkSteve.getTarget().getBlockY() - 0.5F,
                 jerkSteve.getTarget().getZ(), 30.0F, 30.0F);
 
+        Item tool = JerkSteveUtil.getToolToMine(jerkSteve, posBelowTarget, JerkSteveEntity.items);
+        jerkSteve.equipStack(EquipmentSlot.MAINHAND, new ItemStack(tool));
+        
         if (!jerkSteve.handSwinging) {
             jerkSteve.swingHand(jerkSteve.getActiveHand());
         }
