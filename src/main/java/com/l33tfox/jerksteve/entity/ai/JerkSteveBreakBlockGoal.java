@@ -70,7 +70,7 @@ public class JerkSteveBreakBlockGoal extends Goal {
         }
 
         posBelowTarget = pos2Below.add(0, 1, 0);
-        return canSpleef && jerkSteve.getWorld().getGameRules().getBoolean(GameRules.DO_MOB_GRIEFING);
+        return canSpleef && jerkSteve.canInteractWithBlockAt(posBelowTarget, 0) && jerkSteve.getWorld().getGameRules().getBoolean(GameRules.DO_MOB_GRIEFING);
     }
 
     @Override
@@ -103,7 +103,7 @@ public class JerkSteveBreakBlockGoal extends Goal {
 
         Item tool = JerkSteveUtil.getToolToMine(jerkSteve, posBelowTarget, JerkSteveEntity.items);
         jerkSteve.equipStack(EquipmentSlot.MAINHAND, new ItemStack(tool));
-        
+
         if (!jerkSteve.handSwinging) {
             jerkSteve.swingHand(jerkSteve.getActiveHand());
         }

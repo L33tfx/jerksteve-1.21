@@ -72,16 +72,16 @@ public class JerkSteveEntity extends HostileEntity implements RangedAttackMob, I
     protected void initGoals() {
         JerkSteveEggAttackGoal<JerkSteveEntity> shootEggGoal = new JerkSteveEggAttackGoal<>(this, 1.0, 20, 15.0F);
         shootEggGoal.setControls(EnumSet.of(Goal.Control.LOOK, Goal.Control.MOVE));
-//        goalSelector.add(1, shootEggGoal);
+        goalSelector.add(1, shootEggGoal);
         JerkSteveBowAttackGoal<JerkSteveEntity> shootBowGoal = new JerkSteveBowAttackGoal<>(this, 1.0, 20, 15.0F);
         shootBowGoal.setControls(EnumSet.of(Goal.Control.LOOK, Goal.Control.MOVE));
-//        goalSelector.add(1, shootBowGoal);
+        goalSelector.add(1, shootBowGoal);
         JerkStevePlaceBlockGoal placeBlockGoal = new JerkStevePlaceBlockGoal(this);
         placeBlockGoal.setControls(EnumSet.of(Goal.Control.LOOK, Goal.Control.MOVE));
 //        goalSelector.add(1, placeBlockGoal);
         JerkSteveBreakBlockGoal breakBlockGoal = new JerkSteveBreakBlockGoal(this, 2);
         breakBlockGoal.setControls(EnumSet.of(Goal.Control.LOOK, Goal.Control.MOVE));
-        goalSelector.add(1, breakBlockGoal);
+        goalSelector.add(0, breakBlockGoal);
         goalSelector.add(1, new SwimGoal(this));
         goalSelector.add(3, new FleeEntityGoal<>(this, PlayerEntity.class, 6.0F, 0.1, 0.13));
         goalSelector.add(5, new WanderNearTargetGoal(this, 0.1, 32.0F));
@@ -109,11 +109,6 @@ public class JerkSteveEntity extends HostileEntity implements RangedAttackMob, I
     @Nullable
     @Override
     public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData) {
-
-        //equipStack(EquipmentSlot.MAINHAND, new ItemStack(new BowItem(settings), 1));
-        //inventory.addStack(new ItemStack(new BowItem(settings), 1));
-        //itemList.set(0, new ItemStack(new BowItem(settings), 1));
-        //itemList.set(0, ItemStack.EMPTY);
         initEquipment(random, difficulty);
         return super.initialize(world, difficulty, spawnReason, entityData);
     }
@@ -121,7 +116,7 @@ public class JerkSteveEntity extends HostileEntity implements RangedAttackMob, I
     @Override
     protected void initEquipment(Random random, LocalDifficulty localDifficulty) {
         super.initEquipment(random, localDifficulty);
-        equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.BOW));
+        equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.AIR));
     }
 
     @Override
@@ -129,26 +124,14 @@ public class JerkSteveEntity extends HostileEntity implements RangedAttackMob, I
         super.tick();
     }
 
-    public void lookAtBlockBelowEntity(Entity targetEntity) {
-        lookAtEntity(targetEntity, 30.0F, 30.0F);
-
-        double d = targetEntity.getX() - this.getX();
-        double e = targetEntity.getZ() - this.getZ();
-        double f = targetEntity.getBlockY() - this.getEyeY() - 1.5F;
-        double g = Math.sqrt(d * d + e * e);
-
-        float i = (float)(-(MathHelper.atan2(f, g) * 180.0F / (float)Math.PI));
-        this.setPitch(changeAngle(this.getPitch(), i, 30.0F));
-    }
-
     @Override
     public void shootAt(LivingEntity target, float pullProgress) {
         double random = Math.random();
-        if (random >= 0.5) { // shoot arrow - copied from abstractskeletonentity class
-            if (!activeItemStack.getItem().equals(Items.BOW)) {
-                equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.BOW));
-            }
-//        if (getMainHandStack().getItem().equals(Items.BOW)) {
+//        if (random >= 0.5) { // shoot arrow - copied from abstractskeletonentity class
+//            if (!activeItemStack.getItem().equals(Items.BOW)) {
+//                equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.BOW));
+//            }
+        if (getMainHandStack().getItem().equals(Items.BOW)) {
             ItemStack itemStack = this.getStackInHand(ProjectileUtil.getHandPossiblyHolding(this, Items.BOW));
             ItemStack itemStack2 = this.getProjectileType(itemStack);
             PersistentProjectileEntity persistentProjectileEntity = this.createArrowProjectile(itemStack2, pullProgress, itemStack);

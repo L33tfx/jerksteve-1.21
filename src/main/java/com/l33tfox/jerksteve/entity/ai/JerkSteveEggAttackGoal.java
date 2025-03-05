@@ -17,9 +17,14 @@ public class JerkSteveEggAttackGoal<T extends HostileEntity & RangedAttackMob> e
     }
 
     @Override
+    public void start() {
+        super.start();
+        jerkSteve.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.EGG));
+    }
+
+    @Override
     public boolean canStart() {
-        //jerkSteve.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.BOW));
-        return super.canStart();
+        return super.canStart() && jerkSteve.getTarget() != null && jerkSteve.getTarget().getHealth() >= 5.0F;
     }
 
 }

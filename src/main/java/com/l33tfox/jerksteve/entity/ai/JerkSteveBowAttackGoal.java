@@ -15,4 +15,20 @@ public class JerkSteveBowAttackGoal<T extends HostileEntity & RangedAttackMob> e
         super(actor, speed, attackInterval, range);
         jerkSteve = actor;
     }
+
+    @Override
+    public void start() {
+        super.start();
+        jerkSteve.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.BOW));
+    }
+
+    @Override
+    public boolean canStart() {
+        return jerkSteve.getTarget() != null && jerkSteve.getTarget().getHealth() < 5.0F;
+    }
+
+    @Override
+    public boolean shouldContinue() {
+        return canStart() && isHoldingBow();
+    }
 }
