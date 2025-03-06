@@ -28,7 +28,10 @@ public class JerkSteveUtil {
     }
 
     public static boolean isNotCollidable(BlockState blockState) {
-        return blockState.isAir() || blockState.isLiquid() || blockState.isIn(BlockTags.FIRE);
+        return blockState.isAir()
+                || blockState.isLiquid()
+                || blockState.isIn(BlockTags.FIRE)
+                || !blockState.isSolid();
     }
 
     public static int roundToBlock(double coord) {

@@ -1,10 +1,12 @@
 package com.l33tfox.jerksteve.entity.ai;
 
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.ai.pathing.Path;
 import net.minecraft.entity.mob.PathAwareEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.predicate.entity.EntityPredicates;
 
 import java.util.EnumSet;
@@ -18,10 +20,7 @@ public class JerkSteveFollowTargetGoal extends Goal {
     private double targetY;
     private double targetZ;
     private int updateCountdownTicks;
-    private int cooldown;
-    private final int attackIntervalTicks = 20;
     private long lastUpdateTime;
-    private static final long MAX_ATTACK_TIME = 20L;
 
     public JerkSteveFollowTargetGoal(PathAwareEntity mob, double speed, boolean pauseWhenMobIdle) {
         this.mob = mob;
@@ -44,7 +43,7 @@ public class JerkSteveFollowTargetGoal extends Goal {
                 return false;
             } else {
                 this.path = this.mob.getNavigation().findPathTo(livingEntity, 0);
-                return this.path != null;
+                return this.path != null && mob.squaredDistanceTo(mob.getTarget()) > 9.0F;
             }
         }
     }
@@ -59,15 +58,15 @@ public class JerkSteveFollowTargetGoal extends Goal {
         } else if (!this.pauseWhenMobIdle) {
             return !this.mob.getNavigation().isIdle();
         } else {
-            return this.mob.isInWalkTargetRange(livingEntity.getBlockPos()) && !livingEntity.isSpectator() && !((PlayerEntity) livingEntity).isCreative();
+            return mob.squaredDistanceTo(livingEntity) > 9.0F && !livingEntity.isSpectator() && !((PlayerEntity) livingEntity).isCreative();
         }
     }
 
     @Override
     public void start() {
         this.mob.getNavigation().startMovingAlong(this.path, this.speed);
+        mob.equipStack(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
         this.updateCountdownTicks = 0;
-        this.cooldown = 0;
     }
 
     @Override
@@ -103,20 +102,19 @@ public class JerkSteveFollowTargetGoal extends Goal {
                 this.targetZ = livingEntity.getZ();
                 this.updateCountdownTicks = 4 + this.mob.getRandom().nextInt(7);
                 double d = this.mob.squaredDistanceTo(livingEntity);
-                if (d > 1024.0) {
-                    this.updateCountdownTicks += 10;
-                } else if (d > 256.0) {
-                    this.updateCountdownTicks += 5;
-                }
+//                if (d > 1024.0) {
+//                    this.updateCountdownTicks += 10;
+//                } else if (d > 256.0) {
+//                    this.updateCountdownTicks += 5;
+//                }
 
                 if (!this.mob.getNavigation().startMovingTo(livingEntity, this.speed)) {
-                    this.updateCountdownTicks += 15;
+                    this.updateCountdownTicks += 5;
                 }
 
                 this.updateCountdownTicks = this.getTickCount(this.updateCountdownTicks);
             }
 
-            this.cooldown = Math.max(this.cooldown - 1, 0);
         }
     }
 

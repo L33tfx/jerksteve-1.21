@@ -3,8 +3,7 @@
   "package": "com.l33tfox.jerksteve.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "SnowballEntityMixin",
-    "WanderNearTargetGoalAccessor"
+    "SnowballEntityMixin"
   ],
   "injectors": {
     "defaultRequire": 1
