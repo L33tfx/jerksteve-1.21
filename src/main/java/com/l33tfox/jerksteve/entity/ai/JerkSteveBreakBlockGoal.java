@@ -7,24 +7,14 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.Goal;
-import net.minecraft.entity.mob.MobEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.world.Difficulty;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.WorldEvents;
 
-import java.util.function.Predicate;
-
-public class JerkSteveBreakBlockGoal extends Goal implements JerkSteveAttackGoal {
+public class JerkSteveBreakBlockGoal extends Goal {
 
     private final JerkSteveEntity jerkSteve;
     private static final int MIN_MAX_PROGRESS = 240;
@@ -32,9 +22,11 @@ public class JerkSteveBreakBlockGoal extends Goal implements JerkSteveAttackGoal
     protected int breakProgress;
     protected int prevBreakProgress = -1;
     protected int maxProgress = -1;
+    private boolean blockMined;
 
     public JerkSteveBreakBlockGoal(JerkSteveEntity jerkSteve, int maxProgress) {
         this.jerkSteve = jerkSteve;
+        blockMined = false;
     }
 
     protected int getMaxProgress() {
@@ -47,8 +39,9 @@ public class JerkSteveBreakBlockGoal extends Goal implements JerkSteveAttackGoal
             return false;
         }
 
+        blockMined = false;
         boolean canSpleef = false;
-        BlockPos pos2Below = JerkSteveUtil.posXBelow(jerkSteve.getTarget(), 2);
+        BlockPos pos2Below = JerkSteveUtil.posXBelow(jerkSteve.getTarget(), 2); // might be able to use BlockPos.ofFloored instead
 
         BlockState state2Below = jerkSteve.getWorld().getBlockState(pos2Below);
 
@@ -77,6 +70,10 @@ public class JerkSteveBreakBlockGoal extends Goal implements JerkSteveAttackGoal
 
     @Override
     public void stop() {
+        if (jerkSteve.getWorld().getBlockState(posBelowTarget).isAir() && jerkSteve.getTarget() != null && jerkSteve.getTarget().getVelocity().y <= 0 && blockMined) {
+            JerkSteve.LOGGER.info("a");
+            jerkSteve.successfullyAttacked = true;
+        }
         jerkSteve.getWorld().setBlockBreakingInfo(jerkSteve.getId(), posBelowTarget, -1);
     }
 
@@ -107,6 +104,7 @@ public class JerkSteveBreakBlockGoal extends Goal implements JerkSteveAttackGoal
         if (m >= 7.5F) {
             jerkSteve.getWorld().breakBlock(posBelowTarget, true, jerkSteve);
             jerkSteve.getWorld().syncWorldEvent(WorldEvents.BLOCK_BROKEN, posBelowTarget, Block.getRawIdFromState(jerkSteve.getWorld().getBlockState(posBelowTarget)));
+            blockMined = true;
         }
     }
 }

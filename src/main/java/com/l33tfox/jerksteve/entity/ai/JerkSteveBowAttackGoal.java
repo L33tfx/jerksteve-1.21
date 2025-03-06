@@ -4,13 +4,11 @@ import com.l33tfox.jerksteve.entity.custom.JerkSteveEntity;
 import com.l33tfox.jerksteve.entity.util.JerkSteveUtil;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.RangedAttackMob;
 import net.minecraft.entity.ai.goal.BowAttackGoal;
-import net.minecraft.entity.mob.HostileEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 
-public class JerkSteveBowAttackGoal<T extends JerkSteveEntity> extends BowAttackGoal<T> implements JerkSteveAttackGoal {
+public class JerkSteveBowAttackGoal<T extends JerkSteveEntity> extends BowAttackGoal<T> {
 
     private final JerkSteveEntity jerkSteve;
     private final float range;
@@ -34,6 +32,16 @@ public class JerkSteveBowAttackGoal<T extends JerkSteveEntity> extends BowAttack
         return target != null
                 && target.getHealth() < JerkSteveUtil.bowAttackHealthThreshold
                 && jerkSteve.squaredDistanceTo(target.getX(), target.getY(), target.getZ()) <= range * range;
+    }
+
+    @Override
+    public void stop() {
+        if (jerkSteve.getTarget() != null && !jerkSteve.getTarget().isAlive()) {
+            jerkSteve.successfullyAttacked = jerkSteve.projectileThrown;
+            jerkSteve.projectileThrown = false;
+        }
+
+        super.stop();
     }
 
     @Override

@@ -23,12 +23,13 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumSet;
-import java.util.Set;
 
 public class JerkSteveEntity extends HostileEntity implements RangedAttackMob, InventoryOwner {
 
     private static final Item.Settings settings = new Item.Settings();
     public final SimpleInventory inventory = new SimpleInventory(9);
+    public boolean successfullyAttacked = false;
+    public boolean projectileThrown = false;
 
     public static final Item[] items = {
             Items.BOW,
@@ -60,43 +61,33 @@ public class JerkSteveEntity extends HostileEntity implements RangedAttackMob, I
         return new Box(pos).squaredMagnitude(this.getEyePos()) < d * d;
     }
 
-    public boolean canAttackGoalStart() {
-        Set<PrioritizedGoal> goals = goalSelector.getGoals();
-
-        for (PrioritizedGoal goal : goals) {
-            if (goal instanceof JerkSteveAttackGoal && goal.canStart()) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     @Override
     protected void initGoals() {
         JerkSteveSnowballAttackGoal<JerkSteveEntity> shootSnowballGoal = new JerkSteveSnowballAttackGoal<>(this, 1.0, 20, 15.0F);
         shootSnowballGoal.setControls(EnumSet.of(Goal.Control.LOOK, Goal.Control.MOVE));
-        goalSelector.add(1, shootSnowballGoal);
+        goalSelector.add(2, shootSnowballGoal);
         JerkSteveBowAttackGoal<JerkSteveEntity> shootBowGoal = new JerkSteveBowAttackGoal<>(this, 1.0, 20, 15.0F);
         shootBowGoal.setControls(EnumSet.of(Goal.Control.LOOK, Goal.Control.MOVE));
-        goalSelector.add(1, shootBowGoal);
+        goalSelector.add(2, shootBowGoal);
         JerkStevePlaceBlockGoal placeBlockGoal = new JerkStevePlaceBlockGoal(this);
         placeBlockGoal.setControls(EnumSet.of(Goal.Control.LOOK, Goal.Control.MOVE));
 //        goalSelector.add(1, placeBlockGoal);
         JerkSteveBreakBlockGoal breakBlockGoal = new JerkSteveBreakBlockGoal(this, 2);
         breakBlockGoal.setControls(EnumSet.of(Goal.Control.LOOK, Goal.Control.MOVE));
-        goalSelector.add(0, breakBlockGoal);
+        goalSelector.add(1, breakBlockGoal);
         JerkSteveFollowTargetGoal followTargetGoal= new JerkSteveFollowTargetGoal(this, 3.5, true);
         followTargetGoal.setControls(EnumSet.of(Goal.Control.LOOK, Goal.Control.MOVE));
-        goalSelector.add(2, followTargetGoal);
-        goalSelector.add(1, new SwimGoal(this));
-//        goalSelector.add(3, new FleeEntityGoal<>(this, PlayerEntity.class, 6.0F, 0.1, 0.13));
-        goalSelector.add(3, new WanderNearTargetGoal(this, 3.5, 20.0F));
+        goalSelector.add(3, followTargetGoal);
+        goalSelector.add(2, new SwimGoal(this));
+        JerkSteveFleeTargetGoal<PlayerEntity> fleeTargetGoal = new JerkSteveFleeTargetGoal<>(this, PlayerEntity.class, 17.0F, 3.75, 4);
+        fleeTargetGoal.setControls(EnumSet.of(Goal.Control.LOOK, Goal.Control.MOVE));
+        goalSelector.add(0, fleeTargetGoal);
+        goalSelector.add(4, new WanderNearTargetGoal(this, 3.5, 20.0F));
 //        goalSelector.add(5, new WanderAroundFarGoal(this, 1.0));
         LookAtEntityGoal lookAtPlayerGoal = new LookAtEntityGoal(this, PlayerEntity.class, 20.0F);
         lookAtPlayerGoal.setControls(EnumSet.of(Goal.Control.LOOK));
 //        goalSelector.add(6, lookAtPlayerGoal);
-        goalSelector.add(3, new LookAroundGoal(this));
+        goalSelector.add(4, new LookAroundGoal(this));
         targetSelector.add(0, new ActiveTargetGoal<>(this, PlayerEntity.class, true));
     }
 
@@ -138,6 +129,7 @@ public class JerkSteveEntity extends HostileEntity implements RangedAttackMob, I
 //            if (!activeItemStack.getItem().equals(Items.BOW)) {
 //                equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.BOW));
 //            }
+        projectileThrown = true;
         if (getMainHandStack().getItem().equals(Items.BOW)) {
             ItemStack itemStack = this.getStackInHand(ProjectileUtil.getHandPossiblyHolding(this, Items.BOW));
             ItemStack itemStack2 = this.getProjectileType(itemStack);

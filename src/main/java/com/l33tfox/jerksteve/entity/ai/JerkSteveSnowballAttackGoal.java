@@ -1,5 +1,7 @@
 package com.l33tfox.jerksteve.entity.ai;
 
+import com.l33tfox.jerksteve.JerkSteve;
+import com.l33tfox.jerksteve.entity.custom.JerkSteveEntity;
 import com.l33tfox.jerksteve.entity.util.JerkSteveUtil;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
@@ -10,7 +12,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.math.BlockPos;
 
-public class JerkSteveSnowballAttackGoal<T extends HostileEntity & RangedAttackMob> extends ProjectileAttackGoal implements JerkSteveAttackGoal {
+public class JerkSteveSnowballAttackGoal<T extends JerkSteveEntity> extends ProjectileAttackGoal {
 
     private final T jerkSteve;
     private final float range;
@@ -34,12 +36,24 @@ public class JerkSteveSnowballAttackGoal<T extends HostileEntity & RangedAttackM
                 && target != null
                 && target.getHealth() >= JerkSteveUtil.bowAttackHealthThreshold
                 && jerkSteve.squaredDistanceTo(target.getX(), target.getY(), target.getZ()) <= range * range
-                && isTargetNearDrop();
+                && (isTargetNearDrop() || target.isInFluid());
     }
 
     @Override
     public boolean shouldContinue() {
         return this.canStart();
+    }
+
+    @Override
+    public void stop() {
+        JerkSteve.LOGGER.info("" + jerkSteve.getTarget().getVelocity().y);
+        if (jerkSteve.getTarget() != null && !jerkSteve.getTarget().isOnGround()) {
+            JerkSteve.LOGGER.info("A");
+            jerkSteve.successfullyAttacked = jerkSteve.projectileThrown;
+            jerkSteve.projectileThrown = false;
+        }
+
+        super.stop();
     }
 
     public boolean isTargetNearDrop() {
@@ -63,4 +77,5 @@ public class JerkSteveSnowballAttackGoal<T extends HostileEntity & RangedAttackM
 
         return false;
     }
+
 }
