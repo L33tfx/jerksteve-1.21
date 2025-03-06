@@ -79,10 +79,10 @@ public class JerkSteveEntity extends HostileEntity implements RangedAttackMob, I
         followTargetGoal.setControls(EnumSet.of(Goal.Control.LOOK, Goal.Control.MOVE));
         goalSelector.add(3, followTargetGoal);
         goalSelector.add(2, new SwimGoal(this));
-        JerkSteveFleeTargetGoal<PlayerEntity> fleeTargetGoal = new JerkSteveFleeTargetGoal<>(this, PlayerEntity.class, 17.0F, 3.75, 4);
+        JerkSteveFleeTargetGoal<PlayerEntity> fleeTargetGoal = new JerkSteveFleeTargetGoal<>(this, PlayerEntity.class, 20.0F, 3.75, 4);
         fleeTargetGoal.setControls(EnumSet.of(Goal.Control.LOOK, Goal.Control.MOVE));
         goalSelector.add(0, fleeTargetGoal);
-        goalSelector.add(4, new WanderNearTargetGoal(this, 3.5, 20.0F));
+        goalSelector.add(4, new WanderNearTargetGoal(this, 3.5, 15.0F));
 //        goalSelector.add(5, new WanderAroundFarGoal(this, 1.0));
         LookAtEntityGoal lookAtPlayerGoal = new LookAtEntityGoal(this, PlayerEntity.class, 20.0F);
         lookAtPlayerGoal.setControls(EnumSet.of(Goal.Control.LOOK));
@@ -96,7 +96,7 @@ public class JerkSteveEntity extends HostileEntity implements RangedAttackMob, I
                 .add(EntityAttributes.GENERIC_MAX_HEALTH, 20)
                 .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.1F)
                 .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 1)
-                .add(EntityAttributes.GENERIC_FOLLOW_RANGE, 20)
+                .add(EntityAttributes.GENERIC_FOLLOW_RANGE, 50)
                 .add(EntityAttributes.PLAYER_BLOCK_INTERACTION_RANGE, 4.5)
                 .add(EntityAttributes.PLAYER_ENTITY_INTERACTION_RANGE, 3.0)
                 .add(EntityAttributes.PLAYER_BLOCK_BREAK_SPEED)
