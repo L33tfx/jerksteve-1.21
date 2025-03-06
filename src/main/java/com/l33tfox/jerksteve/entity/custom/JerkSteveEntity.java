@@ -86,7 +86,7 @@ public class JerkSteveEntity extends HostileEntity implements RangedAttackMob, I
         JerkSteveBreakBlockGoal breakBlockGoal = new JerkSteveBreakBlockGoal(this, 2);
         breakBlockGoal.setControls(EnumSet.of(Goal.Control.LOOK, Goal.Control.MOVE));
         goalSelector.add(0, breakBlockGoal);
-        JerkSteveFollowTargetGoal followTargetGoal= new JerkSteveFollowTargetGoal(this, 3, 15.0F);
+        JerkSteveFollowTargetGoal followTargetGoal= new JerkSteveFollowTargetGoal(this, 3, true);
         followTargetGoal.setControls(EnumSet.of(Goal.Control.LOOK, Goal.Control.MOVE));
         goalSelector.add(2, followTargetGoal);
         goalSelector.add(1, new SwimGoal(this));

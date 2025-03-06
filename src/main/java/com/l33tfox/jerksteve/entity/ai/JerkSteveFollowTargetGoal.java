@@ -1,64 +1,123 @@
 package com.l33tfox.jerksteve.entity.ai;
 
-import com.l33tfox.jerksteve.JerkSteve;
-import com.l33tfox.jerksteve.entity.custom.JerkSteveEntity;
-import com.l33tfox.jerksteve.mixin.WanderNearTargetGoalAccessor;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.NoPenaltyTargeting;
 import net.minecraft.entity.ai.goal.Goal;
-import net.minecraft.entity.ai.goal.WanderNearTargetGoal;
 import net.minecraft.entity.ai.pathing.Path;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.entity.mob.PathAwareEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.predicate.entity.EntityPredicates;
 
-public class JerkSteveFollowTargetGoal extends WanderNearTargetGoal {
+import java.util.EnumSet;
 
-    private final JerkSteveEntity jerkSteve;
+public class JerkSteveFollowTargetGoal extends Goal {
+    protected final PathAwareEntity mob;
+    private final double speed;
+    private final boolean pauseWhenMobIdle;
     private Path path;
+    private double targetX;
+    private double targetY;
+    private double targetZ;
+    private int updateCountdownTicks;
+    private int cooldown;
+    private final int attackIntervalTicks = 20;
+    private long lastUpdateTime;
+    private static final long MAX_ATTACK_TIME = 20L;
 
-    public JerkSteveFollowTargetGoal(JerkSteveEntity jerkSteve, double speed, float maxDistance) {
-        super(jerkSteve, speed, maxDistance);
-        this.jerkSteve = jerkSteve;
+    public JerkSteveFollowTargetGoal(PathAwareEntity mob, double speed, boolean pauseWhenMobIdle) {
+        this.mob = mob;
+        this.speed = speed;
+        this.pauseWhenMobIdle = pauseWhenMobIdle;
+        this.setControls(EnumSet.of(Goal.Control.MOVE, Goal.Control.LOOK));
     }
 
     @Override
     public boolean canStart() {
-        LivingEntity target = jerkSteve.getTarget();
-        ((WanderNearTargetGoalAccessor) this).setTarget(target);
-
-        JerkSteve.LOGGER.info("c");
-        if (target != null && target.isAlive()) { //&& !jerkSteve.canAttackGoalStart()) {
-            Vec3d vec3d = NoPenaltyTargeting.findTo(jerkSteve, 100, 100, target.getPos(), (float) (Math.PI / 2));
-            JerkSteve.LOGGER.info("a");
-            if (vec3d != null) {
-                JerkSteve.LOGGER.info("b");
-                ((WanderNearTargetGoalAccessor) this).setTargetX(vec3d.x);
-                ((WanderNearTargetGoalAccessor) this).setTargetY(vec3d.y);
-                ((WanderNearTargetGoalAccessor) this).setTargetZ(vec3d.z);
-                return true;
+        long l = this.mob.getWorld().getTime();
+        if (l - this.lastUpdateTime < 5L) {
+            return false;
+        } else {
+            this.lastUpdateTime = l;
+            LivingEntity livingEntity = this.mob.getTarget();
+            if (livingEntity == null) {
+                return false;
+            } else if (!livingEntity.isAlive()) {
+                return false;
+            } else {
+                this.path = this.mob.getNavigation().findPathTo(livingEntity, 0);
+                return this.path != null;
             }
         }
-
-        return false;
     }
-
-//    @Override
-//    public void start() {
-//        path = jerkSteve.getNavigation().findPathTo(target, 2);
-//        jerkSteve.getNavigation().startMovingAlong(this.path, 1.0);
-//    }
 
     @Override
     public boolean shouldContinue() {
-        return !jerkSteve.getNavigation().isIdle() && canStart();
+        LivingEntity livingEntity = this.mob.getTarget();
+        if (livingEntity == null) {
+            return false;
+        } else if (!livingEntity.isAlive()) {
+            return false;
+        } else if (!this.pauseWhenMobIdle) {
+            return !this.mob.getNavigation().isIdle();
+        } else {
+            return this.mob.isInWalkTargetRange(livingEntity.getBlockPos()) && !livingEntity.isSpectator() && !((PlayerEntity) livingEntity).isCreative();
+        }
     }
 
-//    @Override
-//    public void stop() {
-//        jerkSteve.getNavigation().stop();
-//    }
+    @Override
+    public void start() {
+        this.mob.getNavigation().startMovingAlong(this.path, this.speed);
+        this.updateCountdownTicks = 0;
+        this.cooldown = 0;
+    }
+
+    @Override
+    public void stop() {
+        LivingEntity livingEntity = this.mob.getTarget();
+        if (!EntityPredicates.EXCEPT_CREATIVE_OR_SPECTATOR.test(livingEntity)) {
+            this.mob.setTarget(null);
+        }
+
+        this.mob.getNavigation().stop();
+    }
 
     @Override
     public boolean shouldRunEveryTick() {
         return true;
     }
+
+    @Override
+    public void tick() {
+        LivingEntity livingEntity = this.mob.getTarget();
+        if (livingEntity != null) {
+            //this.mob.getLookControl().lookAt(livingEntity, 30.0F, 30.0F);
+            this.updateCountdownTicks = Math.max(this.updateCountdownTicks - 1, 0);
+            if ((this.pauseWhenMobIdle || this.mob.getVisibilityCache().canSee(livingEntity))
+                    && this.updateCountdownTicks <= 0
+                    && (
+                    this.targetX == 0.0 && this.targetY == 0.0 && this.targetZ == 0.0
+                            || livingEntity.squaredDistanceTo(this.targetX, this.targetY, this.targetZ) >= 1.0
+                            || this.mob.getRandom().nextFloat() < 0.05F
+            )) {
+                this.targetX = livingEntity.getX();
+                this.targetY = livingEntity.getY();
+                this.targetZ = livingEntity.getZ();
+                this.updateCountdownTicks = 4 + this.mob.getRandom().nextInt(7);
+                double d = this.mob.squaredDistanceTo(livingEntity);
+                if (d > 1024.0) {
+                    this.updateCountdownTicks += 10;
+                } else if (d > 256.0) {
+                    this.updateCountdownTicks += 5;
+                }
+
+                if (!this.mob.getNavigation().startMovingTo(livingEntity, this.speed)) {
+                    this.updateCountdownTicks += 15;
+                }
+
+                this.updateCountdownTicks = this.getTickCount(this.updateCountdownTicks);
+            }
+
+            this.cooldown = Math.max(this.cooldown - 1, 0);
+        }
+    }
+
 }
