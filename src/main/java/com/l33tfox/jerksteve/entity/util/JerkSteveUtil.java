@@ -9,8 +9,9 @@ import net.minecraft.util.math.BlockPos;
 
 public class JerkSteveUtil {
 
-    public static final float bowAttackHealthThreshold = 5.0F;
+    public static final float BOW_ATTACK_HEALTH_THRESHOLD = 5.0F;
 
+    // Return the best item to use to mine a certain block from a list of possible items
     public static Item getToolToMine(LivingEntity entity, BlockPos blockPos, Item[] possibleItems) {
         BlockState blockState = entity.getWorld().getBlockState(blockPos);
 
@@ -27,6 +28,7 @@ public class JerkSteveUtil {
         return bestItem;
     }
 
+    // Return true if an entity cannot collide with blockState (will fall through it), false if it can
     public static boolean isNotCollidable(BlockState blockState) {
         return blockState.isAir()
                 || blockState.isLiquid()
@@ -51,6 +53,6 @@ public class JerkSteveUtil {
             return null;
         }
 
-        return new BlockPos(roundToBlock(target.getBlockX() + xDisplacement), roundToBlock(target.getBlockY() - yDrop), roundToBlock(target.getBlockZ() + zDisplacement));
+        return new BlockPos(target.getBlockX() + xDisplacement, target.getBlockY() - yDrop, target.getBlockZ() + zDisplacement);
     }
 }

@@ -1,17 +1,17 @@
 package com.l33tfox.jerksteve.entity.ai;
 
-import com.l33tfox.jerksteve.JerkSteve;
 import com.l33tfox.jerksteve.entity.custom.JerkSteveEntity;
 import com.l33tfox.jerksteve.entity.util.JerkSteveUtil;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.BowAttackGoal;
+import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.text.Text;
 
-import java.util.Objects;
+import java.util.EnumSet;
 
+// Goal to shoot target and go for the kill when target's health is low
 public class JerkSteveBowAttackGoal<T extends JerkSteveEntity> extends BowAttackGoal<T> {
 
     private final JerkSteveEntity jerkSteve;
@@ -21,6 +21,7 @@ public class JerkSteveBowAttackGoal<T extends JerkSteveEntity> extends BowAttack
         super(actor, speed, attackInterval, range);
         jerkSteve = actor;
         this.range = range;
+        setControls(EnumSet.of(Goal.Control.LOOK, Goal.Control.MOVE));
     }
 
     @Override
@@ -34,13 +35,13 @@ public class JerkSteveBowAttackGoal<T extends JerkSteveEntity> extends BowAttack
         LivingEntity target = jerkSteve.getTarget();
 
         return target != null
-                && target.getHealth() < JerkSteveUtil.bowAttackHealthThreshold
+                && target.getHealth() < JerkSteveUtil.BOW_ATTACK_HEALTH_THRESHOLD
                 && jerkSteve.squaredDistanceTo(target.getX(), target.getY(), target.getZ()) <= range * range;
     }
 
     @Override
     public void stop() {
-        //JerkSteve.LOGGER.info(jerkSteve.getTarget() + " " + Objects.requireNonNull(jerkSteve.getTarget()).isAlive());
+        // if target died, attack was success and flee target goal should start
         if (jerkSteve.getTarget() == null || !jerkSteve.getTarget().isAlive()) {
             jerkSteve.successfullyAttacked = true;
         }

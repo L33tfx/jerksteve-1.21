@@ -1,20 +1,21 @@
 package com.l33tfox.jerksteve.entity.ai;
 
+import com.l33tfox.jerksteve.entity.custom.JerkSteveEntity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.ai.pathing.Path;
-import net.minecraft.entity.mob.PathAwareEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.predicate.entity.EntityPredicates;
 
 import java.util.EnumSet;
 
+// class based off of MeleeAttackGoal
 public class JerkSteveFollowTargetGoal extends Goal {
-    protected final PathAwareEntity mob;
+    protected final JerkSteveEntity jerkSteve;
     private final double speed;
-    private final boolean pauseWhenMobIdle;
+    private final boolean pauseWhenSteveIdle;
     private Path path;
     private double targetX;
     private double targetY;
@@ -22,61 +23,63 @@ public class JerkSteveFollowTargetGoal extends Goal {
     private int updateCountdownTicks;
     private long lastUpdateTime;
 
-    public JerkSteveFollowTargetGoal(PathAwareEntity mob, double speed, boolean pauseWhenMobIdle) {
-        this.mob = mob;
+    public JerkSteveFollowTargetGoal(JerkSteveEntity jerkSteve, double speed, boolean pauseWhenSteveIdle) {
+        this. jerkSteve = jerkSteve;
         this.speed = speed;
-        this.pauseWhenMobIdle = pauseWhenMobIdle;
+        this.pauseWhenSteveIdle = pauseWhenSteveIdle;
         this.setControls(EnumSet.of(Goal.Control.MOVE, Goal.Control.LOOK));
     }
 
+    // mostly copied from MeleeAttackGoal
     @Override
     public boolean canStart() {
-        long l = this.mob.getWorld().getTime();
-        if (l - this.lastUpdateTime < 5L) {
+        LivingEntity target = jerkSteve.getTarget();
+        long time = jerkSteve.getWorld().getTime();
+
+        if (time - lastUpdateTime < 5L) {
             return false;
-        } else {
-            this.lastUpdateTime = l;
-            LivingEntity livingEntity = this.mob.getTarget();
-            if (livingEntity == null) {
-                return false;
-            } else if (!livingEntity.isAlive()) {
-                return false;
-            } else {
-                this.path = this.mob.getNavigation().findPathTo(livingEntity, 0);
-                return this.path != null && mob.squaredDistanceTo(mob.getTarget()) > 9.0F;
-            }
         }
+
+        lastUpdateTime = time;
+
+        if (target == null || !target.isAlive()) {
+            return false;
+        }
+
+        path = jerkSteve.getNavigation().findPathTo(target, 0);
+        // only start() and try to move closer to target if path can be found and more than 3 blocks away from target
+        return path != null && jerkSteve.squaredDistanceTo(target) > 9.0F;
     }
 
     @Override
     public boolean shouldContinue() {
-        LivingEntity livingEntity = this.mob.getTarget();
-        if (livingEntity == null) {
+        LivingEntity target = jerkSteve.getTarget();
+        if (target == null || !target.isAlive()) {
             return false;
-        } else if (!livingEntity.isAlive()) {
-            return false;
-        } else if (!this.pauseWhenMobIdle) {
-            return !this.mob.getNavigation().isIdle();
-        } else {
-            return mob.squaredDistanceTo(livingEntity) > 9.0F && !livingEntity.isSpectator() && !((PlayerEntity) livingEntity).isCreative();
         }
+
+        if (!pauseWhenSteveIdle) { // this is always false for JerkSteveEntities - i just included it since its in MeleeAttackGoal's shouldContinue()
+            return !jerkSteve.getNavigation().isIdle();
+        }
+
+        return jerkSteve.squaredDistanceTo(target) > 9.0F && !target.isSpectator() && !((PlayerEntity) target).isCreative();
     }
 
     @Override
     public void start() {
-        this.mob.getNavigation().startMovingAlong(this.path, this.speed);
-        mob.equipStack(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
-        this.updateCountdownTicks = 0;
+        jerkSteve.getNavigation().startMovingAlong(path, speed);
+        jerkSteve.equipStack(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
+        updateCountdownTicks = 0;
     }
 
     @Override
     public void stop() {
-        LivingEntity livingEntity = this.mob.getTarget();
-        if (!EntityPredicates.EXCEPT_CREATIVE_OR_SPECTATOR.test(livingEntity)) {
-            this.mob.setTarget(null);
+        LivingEntity target = jerkSteve.getTarget();
+        if (!EntityPredicates.EXCEPT_CREATIVE_OR_SPECTATOR.test(target)) {
+            jerkSteve.setTarget(null);
         }
 
-        this.mob.getNavigation().stop();
+        jerkSteve.getNavigation().stop();
     }
 
     @Override
@@ -84,38 +87,30 @@ public class JerkSteveFollowTargetGoal extends Goal {
         return true;
     }
 
+    // mostly copied from MeleeAttackGoal again
     @Override
     public void tick() {
-        LivingEntity livingEntity = this.mob.getTarget();
-        if (livingEntity != null) {
-            //this.mob.getLookControl().lookAt(livingEntity, 30.0F, 30.0F);
-            this.updateCountdownTicks = Math.max(this.updateCountdownTicks - 1, 0);
-            if ((this.pauseWhenMobIdle || this.mob.getVisibilityCache().canSee(livingEntity))
-                    && this.updateCountdownTicks <= 0
-                    && (
-                    this.targetX == 0.0 && this.targetY == 0.0 && this.targetZ == 0.0
-                            || livingEntity.squaredDistanceTo(this.targetX, this.targetY, this.targetZ) >= 1.0
-                            || this.mob.getRandom().nextFloat() < 0.05F
-            )) {
-                this.targetX = livingEntity.getX();
-                this.targetY = livingEntity.getY();
-                this.targetZ = livingEntity.getZ();
-                this.updateCountdownTicks = 4 + this.mob.getRandom().nextInt(7);
-                double d = this.mob.squaredDistanceTo(livingEntity);
-//                if (d > 1024.0) {
-//                    this.updateCountdownTicks += 10;
-//                } else if (d > 256.0) {
-//                    this.updateCountdownTicks += 5;
-//                }
+        LivingEntity target = jerkSteve.getTarget();
+        if (target != null) {
+            updateCountdownTicks = Math.max(updateCountdownTicks - 1, 0);
+            if ((pauseWhenSteveIdle || jerkSteve.getVisibilityCache().canSee(target))
+                    && updateCountdownTicks <= 0
+                    && (targetX == 0.0 && targetY == 0.0 && targetZ == 0.0
+                            || target.squaredDistanceTo(targetX, targetY, targetZ) >= 1.0
+                            || jerkSteve.getRandom().nextFloat() < 0.05F)) {
+                targetX = target.getX();
+                targetY = target.getY();
+                targetZ = target.getZ();
+                updateCountdownTicks = 4 + jerkSteve.getRandom().nextInt(7);
+                double d = jerkSteve.squaredDistanceTo(target);
 
-                if (!this.mob.getNavigation().startMovingTo(livingEntity, this.speed)) {
-                    this.updateCountdownTicks += 5;
+                if (!jerkSteve.getNavigation().startMovingTo(target, speed)) {
+                    updateCountdownTicks += 5;
                 }
 
-                this.updateCountdownTicks = this.getTickCount(this.updateCountdownTicks);
+                updateCountdownTicks = getTickCount(updateCountdownTicks);
             }
 
         }
     }
-
 }

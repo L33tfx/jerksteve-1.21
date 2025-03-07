@@ -20,6 +20,7 @@ public class JerkSteveRenderer extends BipedEntityRenderer<JerkSteveEntity, Jerk
         return Identifier.of(JerkSteve.MOD_ID, "textures/entity/jerksteve/steve_texture.png");
     }
 
+    // render the entity in game
     @Override
     public void render(JerkSteveEntity livingEntity, float f, float g, MatrixStack matrixStack,
                        VertexConsumerProvider vertexConsumerProvider, int i) {

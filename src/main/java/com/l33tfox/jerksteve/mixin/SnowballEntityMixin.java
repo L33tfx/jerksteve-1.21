@@ -23,6 +23,7 @@ public abstract class SnowballEntityMixin extends ThrownItemEntity {
         super(entityType, world);
     }
 
+    // Make snowball do damage and knockback to players (only when it is thrown by a JerkSteveEntity)
     @Inject(method = "onEntityHit", at = @At("TAIL"))
     private void onPlayerHit(EntityHitResult entityHitResult, CallbackInfo ci) {
         if (getOwner() instanceof JerkSteveEntity jerkSteve && entityHitResult.getEntity() instanceof PlayerEntity player && !player.getAbilities().invulnerable) {
@@ -34,7 +35,7 @@ public abstract class SnowballEntityMixin extends ThrownItemEntity {
                 }
 
                 player.damage(getDamageSources().thrown(jerkSteve, player), 0.5f);
-                jerkSteve.snowballLanded = true;
+                jerkSteve.snowballLanded = true; // used to determine if attack was successful and JerkSteve should run
             }
         }
     }
