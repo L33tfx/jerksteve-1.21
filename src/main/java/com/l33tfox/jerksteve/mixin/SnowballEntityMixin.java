@@ -1,5 +1,6 @@
 package com.l33tfox.jerksteve.mixin;
 
+import com.l33tfox.jerksteve.entity.custom.JerkSteveEntity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.player.PlayerEntity;
@@ -24,15 +25,16 @@ public abstract class SnowballEntityMixin extends ThrownItemEntity {
 
     @Inject(method = "onEntityHit", at = @At("TAIL"))
     private void onPlayerHit(EntityHitResult entityHitResult, CallbackInfo ci) {
-        if (entityHitResult.getEntity() instanceof PlayerEntity player && !player.getAbilities().invulnerable) {
-            double e = Math.max(0.0, 1.0 - player.getAttributeValue(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE));
-            Vec3d vec3d = getVelocity().multiply(1.0, 0.0, 1.0).normalize();
-            if (vec3d.lengthSquared() > 0.0) {
-                player.addVelocity(vec3d.x, 0.1, vec3d.z);
-            }
-
+        if (getOwner() instanceof JerkSteveEntity jerkSteve && entityHitResult.getEntity() instanceof PlayerEntity player && !player.getAbilities().invulnerable) {
             if (player.getWorld() instanceof ServerWorld world) {
-                player.damage(getDamageSources().thrown(this.getOwner(), player), 0.5f);
+                double e = Math.max(0.0, 1.0 - player.getAttributeValue(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE));
+                Vec3d vec3d = getVelocity().multiply(1.0, 0.0, 1.0).normalize();
+                if (vec3d.lengthSquared() > 0.0) {
+                    player.addVelocity(vec3d.x, 0.1, vec3d.z);
+                }
+
+                player.damage(getDamageSources().thrown(jerkSteve, player), 0.5f);
+                jerkSteve.snowballLanded = true;
             }
         }
     }

@@ -37,8 +37,7 @@ public class JerkSteveBowAttackGoal<T extends JerkSteveEntity> extends BowAttack
     @Override
     public void stop() {
         if (jerkSteve.getTarget() != null && !jerkSteve.getTarget().isAlive()) {
-            jerkSteve.successfullyAttacked = jerkSteve.projectileThrown;
-            jerkSteve.projectileThrown = false;
+            jerkSteve.successfullyAttacked = true;
         }
 
         super.stop();

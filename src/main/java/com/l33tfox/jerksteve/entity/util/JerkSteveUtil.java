@@ -43,11 +43,7 @@ public class JerkSteveUtil {
     }
 
     public static BlockPos posXBelow(LivingEntity target, int yDrop) {
-        if (target == null) {
-            return null;
-        }
-
-        return new BlockPos(roundToBlock(target.getX()), roundToBlock(target.getY() - yDrop), roundToBlock(target.getZ()));
+        return posXBelow(target, 0, yDrop, 0);
     }
 
     public static BlockPos posXBelow(LivingEntity target, int xDisplacement, int yDrop, int zDisplacement) {
@@ -55,6 +51,6 @@ public class JerkSteveUtil {
             return null;
         }
 
-        return new BlockPos(roundToBlock(target.getX() + xDisplacement), roundToBlock(target.getY() - yDrop), roundToBlock(target.getZ() + zDisplacement));
+        return new BlockPos(roundToBlock(target.getBlockX() + xDisplacement), roundToBlock(target.getBlockY() - yDrop), roundToBlock(target.getBlockZ() + zDisplacement));
     }
 }

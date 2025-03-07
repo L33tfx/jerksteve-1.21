@@ -29,7 +29,7 @@ public class JerkSteveEntity extends HostileEntity implements RangedAttackMob, I
     private static final Item.Settings settings = new Item.Settings();
     public final SimpleInventory inventory = new SimpleInventory(9);
     public boolean successfullyAttacked = false;
-    public boolean projectileThrown = false;
+    public boolean snowballLanded = false;
 
     public static final Item[] items = {
             Items.BOW,
@@ -39,7 +39,8 @@ public class JerkSteveEntity extends HostileEntity implements RangedAttackMob, I
             Items.SHEARS,
             Items.DIAMOND_AXE,
             Items.DIAMOND_PICKAXE,
-            Items.DIAMOND_SHOVEL
+            Items.DIAMOND_SHOVEL,
+            Items.AIR
     };
 
     public JerkSteveEntity(EntityType<? extends HostileEntity> entityType, World world) {
@@ -129,7 +130,6 @@ public class JerkSteveEntity extends HostileEntity implements RangedAttackMob, I
 //            if (!activeItemStack.getItem().equals(Items.BOW)) {
 //                equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.BOW));
 //            }
-        projectileThrown = true;
         if (getMainHandStack().getItem().equals(Items.BOW)) {
             ItemStack itemStack = this.getStackInHand(ProjectileUtil.getHandPossiblyHolding(this, Items.BOW));
             ItemStack itemStack2 = this.getProjectileType(itemStack);

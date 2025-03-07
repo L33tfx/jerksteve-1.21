@@ -46,11 +46,11 @@ public class JerkSteveSnowballAttackGoal<T extends JerkSteveEntity> extends Proj
 
     @Override
     public void stop() {
-        JerkSteve.LOGGER.info("" + jerkSteve.getTarget().getVelocity().y);
+        //JerkSteve.LOGGER.info("" + jerkSteve.getTarget().getVelocity().y);
         if (jerkSteve.getTarget() != null && !jerkSteve.getTarget().isOnGround()) {
             JerkSteve.LOGGER.info("A");
-            jerkSteve.successfullyAttacked = jerkSteve.projectileThrown;
-            jerkSteve.projectileThrown = false;
+            jerkSteve.successfullyAttacked = jerkSteve.snowballLanded;
+            jerkSteve.snowballLanded = false;
         }
 
         super.stop();
@@ -63,12 +63,17 @@ public class JerkSteveSnowballAttackGoal<T extends JerkSteveEntity> extends Proj
             return false;
         }
 
+        if (target.isOnGround() && target.isSneaking()
+                && JerkSteveUtil.isNotCollidable(jerkSteve.getWorld().getBlockState(JerkSteveUtil.posXBelow(target, 1)))) {
+            return true;
+        }
+
         for (int xDisplace = -2; xDisplace <= 2; xDisplace++) {
             for (int zDisplace = -2; zDisplace <= 2; zDisplace++) {
                 BlockPos blockPos = JerkSteveUtil.posXBelow(target, xDisplace, 1, zDisplace);
                 if (JerkSteveUtil.isNotCollidable(jerkSteve.getWorld().getBlockState(blockPos))) {
-                    BlockPos blockPos2 = JerkSteveUtil.posXBelow(target, xDisplace, 2, zDisplace);
-                    if (!jerkSteve.getWorld().getBlockState(blockPos).isAir() || JerkSteveUtil.isNotCollidable(jerkSteve.getWorld().getBlockState(blockPos2))) {
+                    BlockPos blockPos2 = blockPos.add(0, -1, 0);
+                    if (JerkSteveUtil.isNotCollidable(jerkSteve.getWorld().getBlockState(blockPos2))) {
                         return true;
                     }
                 }
