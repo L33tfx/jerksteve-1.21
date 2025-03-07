@@ -1,5 +1,6 @@
 package com.l33tfox.jerksteve.entity.ai;
 
+import com.l33tfox.jerksteve.JerkSteve;
 import com.l33tfox.jerksteve.entity.custom.JerkSteveEntity;
 import com.l33tfox.jerksteve.entity.util.JerkSteveUtil;
 import net.minecraft.entity.EquipmentSlot;
@@ -7,6 +8,9 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.BowAttackGoal;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.text.Text;
+
+import java.util.Objects;
 
 public class JerkSteveBowAttackGoal<T extends JerkSteveEntity> extends BowAttackGoal<T> {
 
@@ -36,7 +40,8 @@ public class JerkSteveBowAttackGoal<T extends JerkSteveEntity> extends BowAttack
 
     @Override
     public void stop() {
-        if (jerkSteve.getTarget() != null && !jerkSteve.getTarget().isAlive()) {
+        //JerkSteve.LOGGER.info(jerkSteve.getTarget() + " " + Objects.requireNonNull(jerkSteve.getTarget()).isAlive());
+        if (jerkSteve.getTarget() == null || !jerkSteve.getTarget().isAlive()) {
             jerkSteve.successfullyAttacked = true;
         }
 

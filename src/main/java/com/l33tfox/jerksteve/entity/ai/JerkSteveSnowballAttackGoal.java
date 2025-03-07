@@ -3,6 +3,7 @@ package com.l33tfox.jerksteve.entity.ai;
 import com.l33tfox.jerksteve.JerkSteve;
 import com.l33tfox.jerksteve.entity.custom.JerkSteveEntity;
 import com.l33tfox.jerksteve.entity.util.JerkSteveUtil;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.RangedAttackMob;
@@ -49,7 +50,9 @@ public class JerkSteveSnowballAttackGoal<T extends JerkSteveEntity> extends Proj
         //JerkSteve.LOGGER.info("" + jerkSteve.getTarget().getVelocity().y);
         if (jerkSteve.getTarget() != null && !jerkSteve.getTarget().isOnGround()) {
             JerkSteve.LOGGER.info("A");
-            jerkSteve.successfullyAttacked = jerkSteve.snowballLanded;
+            BlockPos blockPosBelowTarget = JerkSteveUtil.posXBelow(jerkSteve.getTarget(), 1);
+            BlockState blockStateBelowTarget = jerkSteve.getWorld().getBlockState(blockPosBelowTarget);
+            jerkSteve.successfullyAttacked = jerkSteve.snowballLanded && JerkSteveUtil.isNotCollidable(blockStateBelowTarget);
             jerkSteve.snowballLanded = false;
         }
 

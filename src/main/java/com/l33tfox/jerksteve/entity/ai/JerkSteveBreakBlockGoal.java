@@ -10,6 +10,7 @@ import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.WorldEvents;
@@ -84,10 +85,20 @@ public class JerkSteveBreakBlockGoal extends Goal {
             return;
         }
 
+        BlockPos blockToMine = posBelowTarget;
+
         jerkSteve.getLookControl().lookAt(jerkSteve.getTarget().getX(), jerkSteve.getTarget().getBlockY() - 0.5F,
                 jerkSteve.getTarget().getZ(), 30.0F, 30.0F);
 
-        Item tool = JerkSteveUtil.getToolToMine(jerkSteve, posBelowTarget, JerkSteveEntity.items);
+        if (jerkSteve.raycast(jerkSteve.getBlockInteractionRange() + 2, 0, false).getType() == HitResult.Type.BLOCK ) {
+            BlockPos blockPos = BlockPos.ofFloored(jerkSteve.raycast(jerkSteve.getBlockInteractionRange() + 2, 0, false).getPos());
+            if (!blockPos.equals(posBelowTarget) && !jerkSteve.getWorld().getBlockState(blockPos).isAir()) {
+                blockToMine = blockPos;
+                JerkSteve.LOGGER.info("" + jerkSteve.getWorld().getBlockState(blockToMine).getBlock());
+            }
+        }
+
+        Item tool = JerkSteveUtil.getToolToMine(jerkSteve, blockToMine, JerkSteveEntity.items);
         jerkSteve.equipStack(EquipmentSlot.MAINHAND, new ItemStack(tool));
 
         if (!jerkSteve.handSwinging) {
@@ -97,14 +108,15 @@ public class JerkSteveBreakBlockGoal extends Goal {
         this.breakProgress++;
         int m = (int)((float)this.breakProgress / (float)this.getMaxProgress() * 30.0F);
         if (m != this.prevBreakProgress) {
-            jerkSteve.getWorld().setBlockBreakingInfo(jerkSteve.getId(), posBelowTarget, m);
+            jerkSteve.getWorld().setBlockBreakingInfo(jerkSteve.getId(), blockToMine, m);
             this.prevBreakProgress = m;
         }
 
         if (m >= 7.5F) {
-            jerkSteve.getWorld().breakBlock(posBelowTarget, true, jerkSteve);
-            jerkSteve.getWorld().syncWorldEvent(WorldEvents.BLOCK_BROKEN, posBelowTarget, Block.getRawIdFromState(jerkSteve.getWorld().getBlockState(posBelowTarget)));
+            jerkSteve.getWorld().breakBlock(blockToMine, true, jerkSteve);
+            jerkSteve.getWorld().syncWorldEvent(WorldEvents.BLOCK_BROKEN, blockToMine, Block.getRawIdFromState(jerkSteve.getWorld().getBlockState(blockToMine)));
             blockMined = true;
+            this.breakProgress = 0;
         }
     }
 }
