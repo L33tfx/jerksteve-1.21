@@ -99,11 +99,11 @@ public class JerkSteveBreakBlockGoal extends Goal {
         // look at block target is standing on
         jerkSteve.getLookControl().lookAt(target.getX(), target.getBlockY() - 0.5F, target.getZ(), 30.0F, 30.0F);
 
-        HitResult raycastResult = jerkSteve.raycast(jerkSteve.getBlockInteractionRange() + 2, 0, false);
+        HitResult raycastResult = jerkSteve.raycast(jerkSteve.getBlockInteractionRange() + 2, 0, true);
         // check if JerkSteve can see that target block directly, or other blocks are in the way
         if (raycastResult.getType() == HitResult.Type.BLOCK) {
             BlockPos blockPos = BlockPos.ofFloored(raycastResult.getPos());
-            if (!blockPos.equals(posBelowTarget) && !jerkSteve.getWorld().getBlockState(blockPos).isAir()) {
+            if (!blockPos.equals(posBelowTarget)) {
                 blockToMine = blockPos;
             }
         }

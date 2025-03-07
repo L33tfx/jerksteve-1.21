@@ -2,7 +2,7 @@ package com.l33tfox.jerksteve.entity.custom;
 
 import com.l33tfox.jerksteve.entity.ai.*;
 import com.l33tfox.jerksteve.entity.util.JerkSteveUtil;
-import net.minecraft.block.BlockState;
+import net.minecraft.block.*;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.RangedAttackMob;
 import net.minecraft.entity.ai.goal.*;
@@ -16,6 +16,7 @@ import net.minecraft.entity.projectile.thrown.SnowballEntity;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.*;
 import net.minecraft.registry.tag.BlockTags;
+import net.minecraft.registry.tag.TagKey;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
@@ -27,6 +28,7 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumSet;
+import java.util.Optional;
 
 public class JerkSteveEntity extends HostileEntity implements RangedAttackMob, InventoryOwner {
 
@@ -80,13 +82,14 @@ public class JerkSteveEntity extends HostileEntity implements RangedAttackMob, I
         goalSelector.add(2, new JerkSteveSnowballAttackGoal<>(this, 1.0, 20, 15.0F));
         goalSelector.add(2, new JerkSteveBowAttackGoal<>(this, 1.0, 20, 15.0F));
         goalSelector.add(2, new SwimGoal(this));
-        goalSelector.add(3, new JerkSteveFollowTargetGoal(this, 3.5, true));
-        goalSelector.add(4, new WanderNearTargetGoal(this, 3.5, 15.0F));
-        goalSelector.add(4, new LookAroundGoal(this));
+        goalSelector.add(3, new JerkStevePressButtonLeverGoal(this, 10.0F, 10));
+        goalSelector.add(4, new JerkSteveFollowTargetGoal(this, 3.5, true));
+        goalSelector.add(5, new WanderNearTargetGoal(this, 3.5, 15.0F));
+        goalSelector.add(5, new LookAroundGoal(this));
 //        goalSelector.add(5, new WanderAroundFarGoal(this, 1.0));
         LookAtEntityGoal lookAtPlayerGoal = new LookAtEntityGoal(this, PlayerEntity.class, 50.0F);
         lookAtPlayerGoal.setControls(EnumSet.of(Goal.Control.LOOK));
-        goalSelector.add(5, lookAtPlayerGoal);
+        goalSelector.add(6, lookAtPlayerGoal);
 
         targetSelector.add(0, new ActiveTargetGoal<>(this, PlayerEntity.class, true));
     }
@@ -161,6 +164,12 @@ public class JerkSteveEntity extends HostileEntity implements RangedAttackMob, I
         return inventory;
     }
 
+    // Make name plate render above JerkSteve
+//    @Override
+//    public boolean isCustomNameVisible() {
+//        return true;
+//    }
+
     // Returns true if there is a drop of more than 2 blocks within 2 blocks of the target
     public boolean isTargetNearDrop() {
         LivingEntity target = getTarget();
@@ -198,5 +207,22 @@ public class JerkSteveEntity extends HostileEntity implements RangedAttackMob, I
         }
 
         return false;
+    }
+
+    public BlockPos getBlockInInteractionRange(Block block, TagKey<Block> blockTagKey) {
+        for (int xDisplace = -2; xDisplace <= 2; xDisplace++) {
+            for (int yDisplace = -2; yDisplace <= 2; yDisplace++) {
+                for (int zDisplace = -2; zDisplace <= 2; zDisplace++) {
+                    BlockPos blockPos = getBlockPos().add(xDisplace, yDisplace + 1, zDisplace);
+                    BlockState blockState = getWorld().getBlockState(blockPos);
+
+                    if ((blockState.isOf(block) || (blockTagKey != null && blockState.isIn(blockTagKey))) && canInteractWithBlockAt(blockPos, 0)) {
+                        return blockPos;
+                    }
+                }
+            }
+        }
+
+        return null;
     }
 }
