@@ -1,5 +1,6 @@
 package com.l33tfox.jerksteve.entity.ai;
 
+import com.l33tfox.jerksteve.JerkSteve;
 import com.l33tfox.jerksteve.entity.custom.JerkSteveEntity;
 import com.l33tfox.jerksteve.entity.util.JerkSteveUtil;
 import net.minecraft.block.*;
@@ -13,6 +14,7 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.BlockStateRaycastContext;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.RaycastContext;
 import net.minecraft.world.WorldEvents;
@@ -43,6 +45,7 @@ public class JerkStevePressButtonLeverGoal extends Goal {
 
     @Override
     public boolean canStart() {
+        JerkSteve.LOGGER.info("in canStart");
         LivingEntity target = jerkSteve.getTarget();
         buttonOrLever = jerkSteve.getBlockInInteractionRange(Blocks.LEVER, BlockTags.BUTTONS);
 
@@ -52,18 +55,21 @@ public class JerkStevePressButtonLeverGoal extends Goal {
 
         Vec3d eyePos = jerkSteve.getEyePos();
 
-        BlockHitResult raycastResult = jerkSteve.getWorld().raycast(new RaycastContext(eyePos, Vec3d.of(buttonOrLever),
-                RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.ANY, ShapeContext.absent()));
+        BlockHitResult raycastResult = jerkSteve.getWorld().raycast(new BlockStateRaycastContext(eyePos, Vec3d.of(buttonOrLever), state -> state.isIn(BlockTags.BUTTONS) || state.isOf(Blocks.LEVER)));
         boolean buttonOrLeverHit = false;
 
         // check if JerkSteve can see button/lever directly, or other blocks are in the way
+        JerkSteve.LOGGER.info("" + raycastResult.getType());
         if (raycastResult.getType() == HitResult.Type.BLOCK) {
             BlockPos blockPos = raycastResult.getBlockPos();
+            JerkSteve.LOGGER.info("" + jerkSteve.getWorld().getBlockState(blockPos).getBlock());
 
             if (blockPos.equals(buttonOrLever)) {
                 buttonOrLeverHit = true;
             }
         }
+
+        JerkSteve.LOGGER.info("button/lever hit: " + buttonOrLeverHit);
 
         return buttonOrLever != null && buttonOrLeverHit && jerkSteve.getWorld().getGameRules().getBoolean(GameRules.DO_MOB_GRIEFING)
                 && target != null && jerkSteve.squaredDistanceTo(target.getX(), target.getY(), target.getZ()) <= range * range;
@@ -77,9 +83,10 @@ public class JerkStevePressButtonLeverGoal extends Goal {
     @Override
     public void tick() {
         LivingEntity target = jerkSteve.getTarget();
+        JerkSteve.LOGGER.info("in tick");
 
         // look at button/lever block
-        jerkSteve.getLookControl().lookAt(buttonOrLever.getX(), buttonOrLever.getY(), buttonOrLever.getZ(), 30.0F, 30.0F);
+        jerkSteve.getLookControl().lookAt(buttonOrLever.getX(), buttonOrLever.getY() + 0.5F, buttonOrLever.getZ(), 30.0F, 30.0F);
 
         if (ticksSinceLastClick % clickTickRate == 0 && ticksSinceLastClick != 0) {
             jerkSteve.swingHand(jerkSteve.getActiveHand());

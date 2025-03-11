@@ -82,7 +82,7 @@ public class JerkSteveEntity extends HostileEntity implements RangedAttackMob, I
         goalSelector.add(2, new JerkSteveSnowballAttackGoal<>(this, 1.0, 20, 15.0F));
         goalSelector.add(2, new JerkSteveBowAttackGoal<>(this, 1.0, 20, 15.0F));
         goalSelector.add(2, new SwimGoal(this));
-        goalSelector.add(3, new JerkStevePressButtonLeverGoal(this, 10.0F, 10));
+        goalSelector.add(3, new JerkStevePressButtonLeverGoal(this, 10.0F, 15));
         goalSelector.add(4, new JerkSteveFollowTargetGoal(this, 3.5, true));
         goalSelector.add(5, new WanderNearTargetGoal(this, 3.5, 15.0F));
         goalSelector.add(5, new LookAroundGoal(this));
