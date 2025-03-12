@@ -4,6 +4,7 @@ import com.l33tfox.jerksteve.JerkSteve;
 import com.l33tfox.jerksteve.entity.custom.JerkSteveEntity;
 import com.l33tfox.jerksteve.entity.util.JerkSteveUtil;
 import net.minecraft.block.*;
+import net.minecraft.block.enums.BlockFace;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.Goal;
@@ -20,6 +21,8 @@ import net.minecraft.world.RaycastContext;
 import net.minecraft.world.WorldEvents;
 
 import java.util.EnumSet;
+
+import static net.minecraft.block.WallMountedBlock.FACE;
 
 public class JerkStevePressButtonLeverGoal extends Goal {
 
@@ -40,7 +43,7 @@ public class JerkStevePressButtonLeverGoal extends Goal {
 
     @Override
     public void start() {
-        ticksSinceLastClick = 0;
+        ticksSinceLastClick = clickTickRate - 5;
     }
 
     @Override
@@ -55,7 +58,8 @@ public class JerkStevePressButtonLeverGoal extends Goal {
 
         Vec3d eyePos = jerkSteve.getEyePos();
 
-        BlockHitResult raycastResult = jerkSteve.getWorld().raycast(new BlockStateRaycastContext(eyePos, Vec3d.of(buttonOrLever), state -> state.isIn(BlockTags.BUTTONS) || state.isOf(Blocks.LEVER)));
+        BlockHitResult raycastResult = jerkSteve.getWorld().raycast(
+                new BlockStateRaycastContext(eyePos, Vec3d.of(buttonOrLever), state -> state.isIn(BlockTags.BUTTONS) || state.isOf(Blocks.LEVER)));
         boolean buttonOrLeverHit = false;
 
         // check if JerkSteve can see button/lever directly, or other blocks are in the way
@@ -85,13 +89,21 @@ public class JerkStevePressButtonLeverGoal extends Goal {
         LivingEntity target = jerkSteve.getTarget();
         JerkSteve.LOGGER.info("in tick");
 
+        BlockState blockState = jerkSteve.getWorld().getBlockState(buttonOrLever);
+        BlockFace face = blockState.get(FACE);
+
+        if (face == BlockFace.FLOOR) {
+            jerkSteve.getLookControl().lookAt(buttonOrLever.getX() + 0.5F, buttonOrLever.getY() - 1, buttonOrLever.getZ() + 0.5F, 30.0F, 30.0F);
+        } else if (face == BlockFace.WALL) {
+            jerkSteve.getLookControl().lookAt(buttonOrLever.getX() + 0.5F, buttonOrLever.getY() + 0.5F, buttonOrLever.getZ() + 0.5F, 30.0F, 30.0F);
+        } else if (face == BlockFace.CEILING) {
+            jerkSteve.getLookControl().lookAt(buttonOrLever.getX() + 0.5F, buttonOrLever.getY() + 1, buttonOrLever.getZ() + 0.5F, 30.0F, 30.0F);
+        }
         // look at button/lever block
-        jerkSteve.getLookControl().lookAt(buttonOrLever.getX(), buttonOrLever.getY() + 0.5F, buttonOrLever.getZ(), 30.0F, 30.0F);
+        //jerkSteve.getLookControl().lookAt(buttonOrLever.getX() + 0.5F, buttonOrLever.getY() + 0.5F, buttonOrLever.getZ() + 0.5F, 30.0F, 30.0F);
 
         if (ticksSinceLastClick % clickTickRate == 0 && ticksSinceLastClick != 0) {
             jerkSteve.swingHand(jerkSteve.getActiveHand());
-
-            BlockState blockState = jerkSteve.getWorld().getBlockState(buttonOrLever);
 
             if (blockState.isOf(Blocks.LEVER)) {
                 LeverBlock leverBlock = (LeverBlock) blockState.getBlock();
