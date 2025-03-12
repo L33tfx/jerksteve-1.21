@@ -165,10 +165,10 @@ public class JerkSteveEntity extends HostileEntity implements RangedAttackMob, I
     }
 
     // Make name plate render above JerkSteve
-//    @Override
-//    public boolean isCustomNameVisible() {
-//        return true;
-//    }
+    @Override
+    public boolean isCustomNameVisible() {
+        return true;
+    }
 
     // Returns true if there is a drop of more than 2 blocks within 2 blocks of the target
     public boolean isTargetNearDrop() {

@@ -29,8 +29,8 @@ public class JerkStevePressButtonLeverGoal extends Goal {
     private final JerkSteveEntity jerkSteve;
     private BlockPos buttonOrLever;
     private int ticksSinceLastClick;
-    private float range;
-    private int clickTickRate;
+    private final float range;
+    private final int clickTickRate;
 
     public JerkStevePressButtonLeverGoal(JerkSteveEntity jerkSteve, float range, int clickTickRate) {
         this.jerkSteve = jerkSteve;
@@ -48,7 +48,6 @@ public class JerkStevePressButtonLeverGoal extends Goal {
 
     @Override
     public boolean canStart() {
-        JerkSteve.LOGGER.info("in canStart");
         LivingEntity target = jerkSteve.getTarget();
         buttonOrLever = jerkSteve.getBlockInInteractionRange(Blocks.LEVER, BlockTags.BUTTONS);
 
@@ -63,17 +62,13 @@ public class JerkStevePressButtonLeverGoal extends Goal {
         boolean buttonOrLeverHit = false;
 
         // check if JerkSteve can see button/lever directly, or other blocks are in the way
-        JerkSteve.LOGGER.info("" + raycastResult.getType());
         if (raycastResult.getType() == HitResult.Type.BLOCK) {
             BlockPos blockPos = raycastResult.getBlockPos();
-            JerkSteve.LOGGER.info("" + jerkSteve.getWorld().getBlockState(blockPos).getBlock());
 
             if (blockPos.equals(buttonOrLever)) {
                 buttonOrLeverHit = true;
             }
         }
-
-        JerkSteve.LOGGER.info("button/lever hit: " + buttonOrLeverHit);
 
         return buttonOrLever != null && buttonOrLeverHit && jerkSteve.getWorld().getGameRules().getBoolean(GameRules.DO_MOB_GRIEFING)
                 && target != null && jerkSteve.squaredDistanceTo(target.getX(), target.getY(), target.getZ()) <= range * range;
@@ -87,7 +82,6 @@ public class JerkStevePressButtonLeverGoal extends Goal {
     @Override
     public void tick() {
         LivingEntity target = jerkSteve.getTarget();
-        JerkSteve.LOGGER.info("in tick");
 
         BlockState blockState = jerkSteve.getWorld().getBlockState(buttonOrLever);
         BlockFace face = blockState.get(FACE);
