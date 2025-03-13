@@ -61,7 +61,7 @@ public class JerkStevePressButtonLeverGoal extends Goal {
                 new BlockStateRaycastContext(eyePos, Vec3d.of(buttonOrLever), state -> state.isIn(BlockTags.BUTTONS) || state.isOf(Blocks.LEVER)));
         boolean buttonOrLeverHit = false;
 
-        // check if JerkSteve can see button/lever directly, or other blocks are in the way
+        // check if JerkSteve can see button/lever block directly or if other blocks are in the way
         if (raycastResult.getType() == HitResult.Type.BLOCK) {
             BlockPos blockPos = raycastResult.getBlockPos();
 
@@ -81,8 +81,6 @@ public class JerkStevePressButtonLeverGoal extends Goal {
 
     @Override
     public void tick() {
-        LivingEntity target = jerkSteve.getTarget();
-
         BlockState blockState = jerkSteve.getWorld().getBlockState(buttonOrLever);
         BlockFace face = blockState.get(FACE);
 
@@ -93,8 +91,6 @@ public class JerkStevePressButtonLeverGoal extends Goal {
         } else if (face == BlockFace.CEILING) {
             jerkSteve.getLookControl().lookAt(buttonOrLever.getX() + 0.5F, buttonOrLever.getY() + 1, buttonOrLever.getZ() + 0.5F, 30.0F, 30.0F);
         }
-        // look at button/lever block
-        //jerkSteve.getLookControl().lookAt(buttonOrLever.getX() + 0.5F, buttonOrLever.getY() + 0.5F, buttonOrLever.getZ() + 0.5F, 30.0F, 30.0F);
 
         if (ticksSinceLastClick % clickTickRate == 0 && ticksSinceLastClick != 0) {
             jerkSteve.swingHand(jerkSteve.getActiveHand());

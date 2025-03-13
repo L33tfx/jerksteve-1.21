@@ -94,6 +94,7 @@ public class JerkSteveEntity extends HostileEntity implements RangedAttackMob, I
         targetSelector.add(0, new ActiveTargetGoal<>(this, PlayerEntity.class, true));
     }
 
+    // Add JerkSteve's EntityAttributes
     public static DefaultAttributeContainer.Builder createAttributes() {
         return MobEntity.createMobAttributes()
                 .add(EntityAttributes.GENERIC_MAX_HEALTH, 20)
@@ -209,6 +210,8 @@ public class JerkSteveEntity extends HostileEntity implements RangedAttackMob, I
         return false;
     }
 
+    // Finds and returns the BlockPos of a block within a 5x5x5 cube of JerkSteve of type block or with key blockTagKey.
+    // If no block is found, returns null
     public BlockPos getBlockInInteractionRange(Block block, TagKey<Block> blockTagKey) {
         for (int xDisplace = -2; xDisplace <= 2; xDisplace++) {
             for (int yDisplace = -2; yDisplace <= 2; yDisplace++) {

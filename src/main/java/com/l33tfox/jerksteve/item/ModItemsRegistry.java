@@ -17,6 +17,8 @@ public class ModItemsRegistry {
     public static void initialize() {
         // get the event for modifying entries in the tools group and register an event handler that adds the mod items.
         ItemGroupEvents.modifyEntriesEvent(ItemGroups.SPAWN_EGGS).register((itemGroup) -> {itemGroup.add(JERKSTEVE_SPAWN_EGG);});
+
+        ItemGroupEvents.modifyEntriesEvent(ItemGroups.BUILDING_BLOCKS).register((itemGroup) -> {itemGroup.add(JerkSteve.JERKSTEVE_CAMERA);});
     }
 
     // helper method for registering new mod items

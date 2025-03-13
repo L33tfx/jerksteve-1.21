@@ -23,6 +23,7 @@ import net.minecraft.world.event.GameEvent;
 
 import java.util.EnumSet;
 
+// CURRENTLY NOT USED FOR JERKSTEVEENTITY - MAY BE ADDED LATER
 public class JerkStevePlaceBlockGoal extends Goal {
     private final JerkSteveEntity jerkSteve;
     private PlayerEntity target;
