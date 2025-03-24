@@ -47,6 +47,11 @@ public class JerkSteveFollowTargetGoal extends Goal {
         }
 
         path = jerkSteve.getNavigation().findPathTo(target, 0);
+
+        if (path == null && jerkSteve.squaredDistanceTo(target) > 400.0F) {
+            jerkSteve.tryTeleportNearTarget();
+        }
+
         // only start() and try to move closer to target if path can be found and more than 3 blocks away from target
         return path != null && jerkSteve.squaredDistanceTo(target) > 9.0F;
     }

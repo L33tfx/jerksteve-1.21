@@ -26,7 +26,7 @@ public class JerkSteve implements ModInitializer {
 			Identifier.of(MOD_ID, "jerksteve"),
 			EntityType.Builder.create(JerkSteveEntity::new, SpawnGroup.MISC).dimensions(0.6f, 1.8f).build());
 	public static final Block JERKSTEVE_CAMERA = registerBlock("jerksteve_camera",
-			new JerkSteveCameraBlock(AbstractBlock.Settings.create().nonOpaque()));
+			new JerkSteveCameraBlock(AbstractBlock.Settings.create().nonOpaque().requiresTool().strength(1.5F, 6.0F)));
 
 	@Override
 	public void onInitialize() {

@@ -1,8 +1,7 @@
 package com.l33tfox.jerksteve.entity.ai;
 
-import com.l33tfox.jerksteve.JerkSteve;
 import com.l33tfox.jerksteve.entity.custom.JerkSteveEntity;
-import com.l33tfox.jerksteve.entity.util.JerkSteveUtil;
+import com.l33tfox.jerksteve.util.JerkSteveUtil;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;

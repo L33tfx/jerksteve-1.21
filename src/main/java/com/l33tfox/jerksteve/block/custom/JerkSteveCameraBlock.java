@@ -1,12 +1,20 @@
 package com.l33tfox.jerksteve.block.custom;
 
+import com.l33tfox.jerksteve.BlockStateDuck;
+import com.l33tfox.jerksteve.JerkSteve;
+import com.l33tfox.jerksteve.entity.custom.JerkSteveEntity;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.block.*;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.SpawnReason;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.DirectionProperty;
@@ -17,7 +25,10 @@ import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
+import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.function.Predicate;
 
 public class JerkSteveCameraBlock extends FacingBlock implements Waterloggable {
 
@@ -80,12 +91,52 @@ public class JerkSteveCameraBlock extends FacingBlock implements Waterloggable {
     @Override
     public void onPlaced(World world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack itemStack) {
         if (!world.isClient()) {
-            world.getClosestPlayer(placer, 64F);
+            PlayerEntity closestPlayer = getClosestPlayerInSurvival(world, pos, placer, 32F);
+
+            EntityType<JerkSteveEntity> entityType = JerkSteve.JERKSTEVE;
+
+            // spawn new JerkSteveEntity on nearest player
+            if (closestPlayer != null) {
+                JerkSteveEntity jerkSteve = entityType.spawn((ServerWorld) world, closestPlayer.getBlockPos(), SpawnReason.EVENT);
+                jerkSteve.tryTeleportNear(closestPlayer.getBlockPos());
+                ((BlockStateDuck) state).jerksteve$setJerkSteve(jerkSteve);
+            }
         }
     }
 
+    // Returns the nearest player to BlockPos pos. Returns the CameraBlock placer if there are no other players nearby.
+    @Nullable
+    public PlayerEntity getClosestPlayerInSurvival(World world, BlockPos pos, @Nullable LivingEntity placer, double maxDistance) {
+        double closestDistance = -1.0;
+        PlayerEntity playerEntity = null;
+
+        for (PlayerEntity playerEntity2 : world.getPlayers()) {
+            if (!playerEntity2.isInCreativeMode() && !playerEntity2.isSpectator() && !playerEntity2.isInvisible()) {
+                double squaredDistance = playerEntity2.squaredDistanceTo(pos.getX(), pos.getY(), pos.getZ());
+                if ((maxDistance < 0.0 || squaredDistance < maxDistance * maxDistance) && (squaredDistance == -1.0 || squaredDistance < closestDistance)) {
+                    closestDistance = squaredDistance;
+                    playerEntity = playerEntity2;
+                }
+            }
+        }
+
+        if (playerEntity == null) {
+            playerEntity = (PlayerEntity) placer;
+        }
+
+        return playerEntity;
+    }
+
+    // Despawn JerkSteveEntity spawned by CameraBlock when block is removed
     @Override
     protected void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
         super.onStateReplaced(state, world, pos, newState, moved);
+
+        JerkSteveEntity jerkSteve = ((BlockStateDuck) state).jerksteve$getJerkSteve();
+        if (jerkSteve != null) {
+            jerkSteve.discard();
+        }
+
+        ((BlockStateDuck) state).jerksteve$setJerkSteve(null);
     }
 }

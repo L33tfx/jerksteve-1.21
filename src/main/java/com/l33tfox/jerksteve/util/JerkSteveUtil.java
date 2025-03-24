@@ -1,5 +1,6 @@
-package com.l33tfox.jerksteve.entity.util;
+package com.l33tfox.jerksteve.util;
 
+import com.l33tfox.jerksteve.entity.custom.JerkSteveEntity;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Item;

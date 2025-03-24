@@ -1,26 +1,32 @@
 package com.l33tfox.jerksteve.entity.custom;
 
+import com.l33tfox.jerksteve.JerkSteve;
 import com.l33tfox.jerksteve.entity.ai.*;
-import com.l33tfox.jerksteve.entity.util.JerkSteveUtil;
+import com.l33tfox.jerksteve.util.JerkSteveUtil;
 import net.minecraft.block.*;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.RangedAttackMob;
 import net.minecraft.entity.ai.goal.*;
+import net.minecraft.entity.ai.pathing.LandPathNodeMaker;
+import net.minecraft.entity.ai.pathing.PathNodeType;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.mob.*;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.PersistentProjectileEntity;
 import net.minecraft.entity.projectile.ProjectileUtil;
+import net.minecraft.entity.projectile.thrown.EnderPearlEntity;
 import net.minecraft.entity.projectile.thrown.SnowballEntity;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.*;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.registry.tag.TagKey;
+import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Vec3i;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.LocalDifficulty;
 import net.minecraft.world.ServerWorldAccess;
@@ -28,7 +34,6 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumSet;
-import java.util.Optional;
 
 public class JerkSteveEntity extends HostileEntity implements RangedAttackMob, InventoryOwner {
 
@@ -97,7 +102,7 @@ public class JerkSteveEntity extends HostileEntity implements RangedAttackMob, I
     // Add JerkSteve's EntityAttributes
     public static DefaultAttributeContainer.Builder createAttributes() {
         return MobEntity.createMobAttributes()
-                .add(EntityAttributes.GENERIC_MAX_HEALTH, 20)
+                .add(EntityAttributes.GENERIC_MAX_HEALTH, 1024)
                 .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.1F)
                 .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 1)
                 .add(EntityAttributes.GENERIC_FOLLOW_RANGE, 128)
@@ -227,5 +232,57 @@ public class JerkSteveEntity extends HostileEntity implements RangedAttackMob, I
         }
 
         return null;
+    }
+
+    // adapted from tameableentity class (used for wolf followownergoal)
+    public void tryTeleportNearTarget() {
+        LivingEntity target = getTarget();
+
+        if (target == null) {
+            return;
+        }
+
+        BlockPos pos = target.getBlockPos();
+        tryTeleportNear(pos);
+    }
+
+    public void tryTeleportNear(Vec3i vec3i) {
+        for (int i = 0; i < 10; i++) {
+            int j = random.nextBetween(-3, 3);
+            int k = random.nextBetween(-3, 3);
+            if (Math.abs(j) >= 2 || Math.abs(k) >= 2) {
+                int l = random.nextBetween(-1, 1);
+                if (tryTeleportTo(vec3i.getX() + j, vec3i.getY() + l, vec3i.getZ() + k)) {
+                    return;
+                }
+            }
+        }
+    }
+
+    // adapted from tameableentity class (used for wolf followownergoal)
+    private boolean tryTeleportTo(int x, int y, int z) {
+        if (!canTeleportTo(new BlockPos(x, y, z))) {
+            return false;
+        }
+
+        //EntityType<EnderPearlEntity> entityType = EntityType.ENDER_PEARL;
+
+        refreshPositionAndAngles((double)x + 0.5, (double)y, (double)z + 0.5, this.getYaw(), this.getPitch());
+        onLanding();
+        damage(getDamageSources().fall(), 5.0F);
+        getWorld().playSound(null, getPos().x, getPos().y, getPos().z, SoundEvents.ENTITY_PLAYER_TELEPORT, SoundCategory.PLAYERS);
+        navigation.stop();
+        return true;
+    }
+
+    // adapted from tameableentity class (used for wolf followownergoal)
+    private boolean canTeleportTo(BlockPos pos) {
+        PathNodeType pathNodeType = LandPathNodeMaker.getLandNodeType(this, pos);
+        if (pathNodeType != PathNodeType.WALKABLE) {
+            return false;
+        }
+
+        BlockPos blockPos = pos.subtract(this.getBlockPos());
+        return this.getWorld().isSpaceEmpty(this, this.getBoundingBox().offset(blockPos));
     }
 }

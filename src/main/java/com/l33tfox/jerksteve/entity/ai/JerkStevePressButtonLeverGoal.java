@@ -1,15 +1,10 @@
 package com.l33tfox.jerksteve.entity.ai;
 
-import com.l33tfox.jerksteve.JerkSteve;
 import com.l33tfox.jerksteve.entity.custom.JerkSteveEntity;
-import com.l33tfox.jerksteve.entity.util.JerkSteveUtil;
 import net.minecraft.block.*;
 import net.minecraft.block.enums.BlockFace;
-import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.Goal;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
@@ -17,8 +12,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.BlockStateRaycastContext;
 import net.minecraft.world.GameRules;
-import net.minecraft.world.RaycastContext;
-import net.minecraft.world.WorldEvents;
 
 import java.util.EnumSet;
 

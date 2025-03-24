@@ -1,7 +1,7 @@
 package com.l33tfox.jerksteve.entity.ai;
 
 import com.l33tfox.jerksteve.entity.custom.JerkSteveEntity;
-import com.l33tfox.jerksteve.entity.util.JerkSteveUtil;
+import com.l33tfox.jerksteve.util.JerkSteveUtil;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.BowAttackGoal;
