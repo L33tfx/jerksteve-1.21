@@ -128,6 +128,12 @@ public class JerkSteveEntity extends HostileEntity implements RangedAttackMob, I
 
     @Override
     public void tick() {
+        heal(getMaxHealth() - getHealth());
+
+        if (getTarget() == null) { // if loses track of target
+            setTarget(getWorld().getClosestPlayer(this, 40F));
+        }
+
         super.tick();
     }
 
@@ -265,12 +271,7 @@ public class JerkSteveEntity extends HostileEntity implements RangedAttackMob, I
             return false;
         }
 
-        //EntityType<EnderPearlEntity> entityType = EntityType.ENDER_PEARL;
-
-        refreshPositionAndAngles((double)x + 0.5, (double)y, (double)z + 0.5, this.getYaw(), this.getPitch());
-        onLanding();
-        damage(getDamageSources().fall(), 5.0F);
-        getWorld().playSound(null, getPos().x, getPos().y, getPos().z, SoundEvents.ENTITY_PLAYER_TELEPORT, SoundCategory.PLAYERS);
+        refreshPositionAndAngles((double)x + 0.5, (double)y, (double)z + 0.5, getYaw(), getPitch());
         navigation.stop();
         return true;
     }

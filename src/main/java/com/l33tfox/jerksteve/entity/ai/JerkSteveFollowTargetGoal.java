@@ -8,6 +8,8 @@ import net.minecraft.entity.ai.pathing.Path;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.predicate.entity.EntityPredicates;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
 
 import java.util.EnumSet;
 
@@ -48,12 +50,19 @@ public class JerkSteveFollowTargetGoal extends Goal {
 
         path = jerkSteve.getNavigation().findPathTo(target, 0);
 
-        if (path == null && jerkSteve.squaredDistanceTo(target) > 400.0F) {
-            jerkSteve.tryTeleportNearTarget();
+        if (jerkSteve.squaredDistanceTo(target) > 1600.0F) {
+            tryTeleport();
         }
 
         // only start() and try to move closer to target if path can be found and more than 3 blocks away from target
         return path != null && jerkSteve.squaredDistanceTo(target) > 9.0F;
+    }
+
+    public void tryTeleport() {
+        jerkSteve.tryTeleportNearTarget();
+        jerkSteve.onLanding();
+        jerkSteve.damage(jerkSteve.getDamageSources().fall(), 0.5F);
+        jerkSteve.getWorld().playSound(null, jerkSteve.getX(), jerkSteve.getY(), jerkSteve.getZ(), SoundEvents.ENTITY_PLAYER_TELEPORT, SoundCategory.PLAYERS);
     }
 
     @Override
@@ -65,6 +74,10 @@ public class JerkSteveFollowTargetGoal extends Goal {
 
         if (!pauseWhenSteveIdle) { // this is always false for JerkSteveEntities - i just included it since its in MeleeAttackGoal's shouldContinue()
             return !jerkSteve.getNavigation().isIdle();
+        }
+
+        if (path == null || jerkSteve.squaredDistanceTo(target) > 1600.0F) {
+            tryTeleport();
         }
 
         return jerkSteve.squaredDistanceTo(target) > 9.0F && !target.isSpectator() && !((PlayerEntity) target).isCreative();

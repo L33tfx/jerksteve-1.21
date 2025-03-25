@@ -15,6 +15,8 @@ import net.minecraft.fluid.Fluids;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.DirectionProperty;
@@ -100,6 +102,11 @@ public class JerkSteveCameraBlock extends FacingBlock implements Waterloggable {
                 JerkSteveEntity jerkSteve = entityType.spawn((ServerWorld) world, closestPlayer.getBlockPos(), SpawnReason.EVENT);
                 jerkSteve.tryTeleportNear(closestPlayer.getBlockPos());
                 ((BlockStateDuck) state).jerksteve$setJerkSteve(jerkSteve);
+
+                // make it seem like JerkSteve just teleported using enderpearl
+                jerkSteve.onLanding();
+                jerkSteve.damage(jerkSteve.getDamageSources().fall(), 0.5F);
+                jerkSteve.getWorld().playSound(null, jerkSteve.getX(), jerkSteve.getY(), jerkSteve.getZ(), SoundEvents.ENTITY_PLAYER_TELEPORT, SoundCategory.PLAYERS);
             }
         }
     }
