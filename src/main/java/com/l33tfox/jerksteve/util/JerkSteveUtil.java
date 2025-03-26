@@ -37,14 +37,6 @@ public class JerkSteveUtil {
                 || !blockState.isSolid();
     }
 
-    public static int roundToBlock(double coord) {
-        if (coord >= 0) {
-            return (int) Math.ceil(coord);
-        } else {
-            return (int) Math.floor(coord);
-        }
-    }
-
     public static BlockPos posXBelow(LivingEntity target, int yDrop) {
         return posXBelow(target, 0, yDrop, 0);
     }

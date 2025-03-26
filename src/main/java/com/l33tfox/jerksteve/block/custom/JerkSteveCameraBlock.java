@@ -1,11 +1,10 @@
 package com.l33tfox.jerksteve.block.custom;
 
-import com.l33tfox.jerksteve.BlockStateDuck;
 import com.l33tfox.jerksteve.JerkSteve;
 import com.l33tfox.jerksteve.entity.custom.JerkSteveEntity;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.block.*;
-import net.minecraft.entity.Entity;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.SpawnReason;
@@ -19,7 +18,6 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
-import net.minecraft.state.property.DirectionProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -27,10 +25,7 @@ import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
-import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.function.Predicate;
 
 public class JerkSteveCameraBlock extends FacingBlock implements Waterloggable {
 
@@ -48,8 +43,9 @@ public class JerkSteveCameraBlock extends FacingBlock implements Waterloggable {
 
     @Override
     protected MapCodec<? extends FacingBlock> getCodec() {
-        return null;
+        return CODEC;
     }
+
 
     @Nullable
     @Override
@@ -67,9 +63,6 @@ public class JerkSteveCameraBlock extends FacingBlock implements Waterloggable {
     @Override
     public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos) {
         if (state.get(WATERLOGGED)) {
-            // For 1.17 and below:
-            // world.getFluidTickScheduler().schedule(pos, Fluids.WATER, Fluids.WATER.getTickRate(world));
-            // For versions since 1.18 below 1.21.2:
             world.scheduleFluidTick(pos, Fluids.WATER, Fluids.WATER.getTickRate(world));
         }
 
@@ -100,8 +93,9 @@ public class JerkSteveCameraBlock extends FacingBlock implements Waterloggable {
             // spawn new JerkSteveEntity on nearest player
             if (closestPlayer != null) {
                 JerkSteveEntity jerkSteve = entityType.spawn((ServerWorld) world, closestPlayer.getBlockPos(), SpawnReason.EVENT);
+                jerkSteve.cameraBlockPos = pos;
+
                 jerkSteve.tryTeleportNear(closestPlayer.getBlockPos());
-                ((BlockStateDuck) state).jerksteve$setJerkSteve(jerkSteve);
 
                 // make it seem like JerkSteve just teleported using enderpearl
                 jerkSteve.onLanding();
@@ -134,16 +128,4 @@ public class JerkSteveCameraBlock extends FacingBlock implements Waterloggable {
         return playerEntity;
     }
 
-    // Despawn JerkSteveEntity spawned by CameraBlock when block is removed
-    @Override
-    protected void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
-        super.onStateReplaced(state, world, pos, newState, moved);
-
-        JerkSteveEntity jerkSteve = ((BlockStateDuck) state).jerksteve$getJerkSteve();
-        if (jerkSteve != null) {
-            jerkSteve.discard();
-        }
-
-        ((BlockStateDuck) state).jerksteve$setJerkSteve(null);
-    }
 }

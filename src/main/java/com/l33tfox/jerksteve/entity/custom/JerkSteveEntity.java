@@ -19,6 +19,7 @@ import net.minecraft.entity.projectile.thrown.EnderPearlEntity;
 import net.minecraft.entity.projectile.thrown.SnowballEntity;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.*;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.sound.SoundCategory;
@@ -37,6 +38,7 @@ import java.util.EnumSet;
 
 public class JerkSteveEntity extends HostileEntity implements RangedAttackMob, InventoryOwner {
 
+    public BlockPos cameraBlockPos = null;
     public final SimpleInventory inventory = new SimpleInventory(9);
     public boolean successfullyAttacked = false; // tracks if last attempted attack harmed target
     public boolean snowballLanded = false; // tracks if last thrown snowball connected with target
@@ -131,10 +133,37 @@ public class JerkSteveEntity extends HostileEntity implements RangedAttackMob, I
         heal(getMaxHealth() - getHealth());
 
         if (getTarget() == null) { // if loses track of target
-            setTarget(getWorld().getClosestPlayer(this, 40F));
+            setTarget(getWorld().getClosestPlayer(getX(), getY(), getZ(), 40F, true));
+        }
+
+        if (cameraBlockPos != null && !getWorld().getBlockState(cameraBlockPos).isOf(JerkSteve.JERKSTEVE_CAMERA)) {
+            getWorld().playSound(null, getX(), getY(), getZ(), SoundEvents.ENTITY_PLAYER_TELEPORT, SoundCategory.PLAYERS);
+            discard();
         }
 
         super.tick();
+    }
+
+    // write location of cameraBlock to NBT data
+    @Override
+    public NbtCompound writeNbt(NbtCompound nbt) {
+        if (cameraBlockPos != null) {
+            nbt.putInt("cameraX", cameraBlockPos.getX());
+            nbt.putInt("cameraY", cameraBlockPos.getY());
+            nbt.putInt("cameraZ", cameraBlockPos.getZ());
+        }
+
+        return super.writeNbt(nbt);
+    }
+
+    // load location of cameraBlock from NBT data
+    @Override
+    public void readNbt(NbtCompound nbt) {
+        if (nbt.contains("cameraX") && nbt.contains("cameraY") && nbt.contains("cameraZ")) {
+            cameraBlockPos = new BlockPos(nbt.getInt("cameraX"), nbt.getInt("cameraY"), nbt.getInt("cameraZ"));
+        }
+
+        super.readNbt(nbt);
     }
 
     // called in the tick() of snowballattackgoal and bowattackgoal

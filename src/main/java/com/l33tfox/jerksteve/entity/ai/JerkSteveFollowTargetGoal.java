@@ -58,7 +58,7 @@ public class JerkSteveFollowTargetGoal extends Goal {
         return path != null && jerkSteve.squaredDistanceTo(target) > 9.0F;
     }
 
-    public void tryTeleport() {
+    private void tryTeleport() {
         jerkSteve.tryTeleportNearTarget();
         jerkSteve.onLanding();
         jerkSteve.damage(jerkSteve.getDamageSources().fall(), 0.5F);

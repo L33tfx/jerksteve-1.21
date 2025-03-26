@@ -3,7 +3,6 @@
   "package": "com.l33tfox.jerksteve.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "BlockStateMixin",
     "SnowballEntityMixin"
   ],
   "injectors": {
