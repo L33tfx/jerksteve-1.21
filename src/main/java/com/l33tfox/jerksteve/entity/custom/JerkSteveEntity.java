@@ -22,6 +22,7 @@ import net.minecraft.item.*;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.registry.tag.TagKey;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.BlockPos;
@@ -64,6 +65,25 @@ public class JerkSteveEntity extends HostileEntity implements RangedAttackMob, I
         }
     }
 
+    // Spawn a new JerkSteveEntity. Used in CameraBlock class's onPlaced() method
+    public static JerkSteveEntity spawnNew(ServerWorld world, BlockPos blockPos, SpawnReason spawnReason, @Nullable BlockPos cameraPos) {
+        EntityType<JerkSteveEntity> entityType = JerkSteve.JERKSTEVE;
+
+        JerkSteveEntity jerkSteve = entityType.spawn(world, blockPos, spawnReason);
+        if (jerkSteve != null) {
+            jerkSteve.cameraBlockPos = cameraPos;
+
+            jerkSteve.tryTeleportNear(blockPos);
+
+            // make it seem like JerkSteve just teleported using enderpearl
+            jerkSteve.onLanding();
+            jerkSteve.damage(jerkSteve.getDamageSources().fall(), 0.5F);
+            jerkSteve.getWorld().playSound(null, jerkSteve.getX(), jerkSteve.getY(), jerkSteve.getZ(), SoundEvents.ENTITY_PLAYER_TELEPORT, SoundCategory.PLAYERS);
+        }
+
+        return jerkSteve;
+    }
+
     // copied from playerentity class - get how far JerkSteve can mine blocks from
     public double getBlockInteractionRange() {
         return getAttributeValue(EntityAttributes.PLAYER_BLOCK_INTERACTION_RANGE);
@@ -93,7 +113,6 @@ public class JerkSteveEntity extends HostileEntity implements RangedAttackMob, I
         goalSelector.add(4, new JerkSteveFollowTargetGoal(this, 3.5, true));
         goalSelector.add(5, new WanderNearTargetGoal(this, 3.5, 15.0F));
         goalSelector.add(5, new LookAroundGoal(this));
-//        goalSelector.add(5, new WanderAroundFarGoal(this, 1.0));
         LookAtEntityGoal lookAtPlayerGoal = new LookAtEntityGoal(this, PlayerEntity.class, 50.0F);
         lookAtPlayerGoal.setControls(EnumSet.of(Goal.Control.LOOK));
         goalSelector.add(6, lookAtPlayerGoal);
@@ -312,7 +331,7 @@ public class JerkSteveEntity extends HostileEntity implements RangedAttackMob, I
             return false;
         }
 
-        BlockPos blockPos = pos.subtract(this.getBlockPos());
-        return this.getWorld().isSpaceEmpty(this, this.getBoundingBox().offset(blockPos));
+        BlockPos blockPos = pos.subtract(getBlockPos());
+        return getWorld().isSpaceEmpty(this, getBoundingBox().offset(blockPos));
     }
 }

@@ -99,19 +99,9 @@ public class JerkSteveCameraBlock extends FacingBlock implements Waterloggable {
         if (!world.isClient()) {
             PlayerEntity closestPlayer = getClosestPlayerInSurvival(world, pos, placer, 32F);
 
-            EntityType<JerkSteveEntity> entityType = JerkSteve.JERKSTEVE;
-
             // spawn new JerkSteveEntity on nearest player
             if (closestPlayer != null) {
-                JerkSteveEntity jerkSteve = entityType.spawn((ServerWorld) world, closestPlayer.getBlockPos(), SpawnReason.EVENT);
-                jerkSteve.cameraBlockPos = pos;
-
-                jerkSteve.tryTeleportNear(closestPlayer.getBlockPos());
-
-                // make it seem like JerkSteve just teleported using enderpearl
-                jerkSteve.onLanding();
-                jerkSteve.damage(jerkSteve.getDamageSources().fall(), 0.5F);
-                jerkSteve.getWorld().playSound(null, jerkSteve.getX(), jerkSteve.getY(), jerkSteve.getZ(), SoundEvents.ENTITY_PLAYER_TELEPORT, SoundCategory.PLAYERS);
+                JerkSteveEntity.spawnNew((ServerWorld) world, closestPlayer.getBlockPos(), SpawnReason.EVENT, pos);
             }
         }
     }
