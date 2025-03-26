@@ -1,0 +1,26 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        " # ",
+        "iGi",
+        "iOi"
+    ],
+    "key": {
+        "#": {
+            "item": "minecraft:diamond"
+        },
+        "i": {
+            "item": "minecraft:iron_ingot"
+        },
+        "G": {
+            "item": "minecraft:glass_pane"
+        },
+        "O": {
+            "item": "minecraft:observer"
+        }
+    },
+    "result": {
+        "count": 1,
+        "id": "jerksteve:jerksteve_camera"
+    }
+}

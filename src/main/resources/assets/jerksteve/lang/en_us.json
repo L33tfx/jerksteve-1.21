@@ -1,5 +1,6 @@
 {
   "item.jerksteve.jerksteve_spawn_egg" : "JerkSteve Spawn Egg",
   "entity.jerksteve.jerksteve" : "JerkSteve",
-  "block.jerksteve.jerksteve_camera" : "JerkSteve's Camera"
+  "block.jerksteve.jerksteve_camera" : "JerkSteve's Camera",
+  "itemTooltip.jerksteve.jerksteve_camera" : "Place to unleash JerkSteve."
 }
