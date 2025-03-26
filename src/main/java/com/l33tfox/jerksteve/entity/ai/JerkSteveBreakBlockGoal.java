@@ -1,5 +1,6 @@
 package com.l33tfox.jerksteve.entity.ai;
 
+import com.l33tfox.jerksteve.JerkSteve;
 import com.l33tfox.jerksteve.entity.custom.JerkSteveEntity;
 import com.l33tfox.jerksteve.util.JerkSteveUtil;
 import net.minecraft.block.Block;
@@ -10,8 +11,11 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.WorldEvents;
 
@@ -49,11 +53,12 @@ public class JerkSteveBreakBlockGoal extends Goal {
 
         BlockState state2Below = jerkSteve.getWorld().getBlockState(pos2Below);
 
-        if (jerkSteve.getTarget().isOnGround() && JerkSteveUtil.isNotCollidable(state2Below)) {
+        posBelowTarget = pos2Below.add(0, 1, 0);
+
+        if (jerkSteve.getTarget().isOnGround() && JerkSteveUtil.isNotCollidable(state2Below) && !jerkSteve.getWorld().getBlockState(posBelowTarget).isOf(Blocks.BEDROCK)) {
             canSpleef = true;
         }
 
-        posBelowTarget = pos2Below.add(0, 1, 0);
         return canSpleef && jerkSteve.canInteractWithBlockAt(posBelowTarget, 0) && jerkSteve.getWorld().getGameRules().getBoolean(GameRules.DO_MOB_GRIEFING);
     }
 
@@ -65,7 +70,8 @@ public class JerkSteveBreakBlockGoal extends Goal {
     @Override
     public boolean shouldContinue() {
         return jerkSteve.getTarget() != null
-                && breakProgress <= getMaxProgress() && !jerkSteve.getWorld().getBlockState(posBelowTarget).isAir()
+                && breakProgress <= getMaxProgress()
+                && jerkSteve.isOnGround()
                 && !jerkSteve.getWorld().getBlockState(posBelowTarget).isOf(Blocks.BEDROCK)
                 && jerkSteve.canInteractWithBlockAt(posBelowTarget, 0)
                 // this prevents player from spam jumping to stop JerkSteve from spleefing
@@ -96,13 +102,24 @@ public class JerkSteveBreakBlockGoal extends Goal {
         BlockPos blockToMine = posBelowTarget;
 
         // look at block target is standing on
-        jerkSteve.getLookControl().lookAt(target.getX(), target.getBlockY() - 0.5F, target.getZ(), 30.0F, 30.0F);
+        jerkSteve.getLookControl().lookAt(target.getX(), target.getSteppingPos().getY(), target.getZ(), 30.0F, 30.0F);
 
-        HitResult raycastResult = jerkSteve.raycast(jerkSteve.getBlockInteractionRange() + 2, 0, true);
+        HitResult raycastResult = jerkSteve.raycast(jerkSteve.getBlockInteractionRange() + 2, 0, false);
         // check if JerkSteve can see that target block directly, or other blocks are in the way
         if (raycastResult.getType() == HitResult.Type.BLOCK) {
             BlockPos blockPos = BlockPos.ofFloored(raycastResult.getPos());
-            if (!blockPos.equals(posBelowTarget)) {
+
+            if (((BlockHitResult) raycastResult).getSide() == Direction.DOWN) {
+                blockPos = blockPos.add(0, 1, 0);
+            } else if (((BlockHitResult) raycastResult).getSide() == Direction.SOUTH) {
+                blockPos = blockPos.add(0, 0, -1);
+            } else if (((BlockHitResult) raycastResult).getSide() == Direction.EAST) {
+                blockPos = blockPos.add(-1, 0, 0);
+            }
+
+            // if target crouching over edge of block, or if there are blocks in between jerksteve and block target is standing on
+            if (jerkSteve.getWorld().getBlockState(posBelowTarget).isAir()
+                    || (!jerkSteve.getWorld().getBlockState(blockPos).isAir() && !blockPos.equals(posBelowTarget))) {
                 blockToMine = blockPos;
             }
         }
