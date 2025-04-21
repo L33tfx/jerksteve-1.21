@@ -116,8 +116,8 @@ public class JerkSteveEntity extends HostileEntity implements RangedAttackMob, I
         LookAtEntityGoal lookAtPlayerGoal = new LookAtEntityGoal(this, PlayerEntity.class, 50.0F);
         lookAtPlayerGoal.setControls(EnumSet.of(Goal.Control.LOOK));
         goalSelector.add(6, lookAtPlayerGoal);
-
-        targetSelector.add(0, new ActiveTargetGoal<>(this, PlayerEntity.class, true));
+        goalSelector.add(6, new WanderAroundGoal(this, 3.5));
+//        targetSelector.add(0, new ActiveTargetGoal<>(this, PlayerEntity.class, true));
     }
 
     // Add JerkSteve's EntityAttributes
@@ -151,7 +151,7 @@ public class JerkSteveEntity extends HostileEntity implements RangedAttackMob, I
     public void tick() {
         heal(getMaxHealth() - getHealth());
 
-        if (getTarget() == null) { // if loses track of target
+        if (getTarget() == null || getTarget().isInCreativeMode() || getTarget().isSpectator() || getTarget().isInvisible()) { // if loses track of target
             setTarget(getWorld().getClosestPlayer(getX(), getY(), getZ(), 40F, true));
         }
 

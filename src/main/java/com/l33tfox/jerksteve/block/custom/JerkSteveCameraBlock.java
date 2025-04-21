@@ -110,12 +110,13 @@ public class JerkSteveCameraBlock extends FacingBlock implements Waterloggable {
     @Nullable
     public PlayerEntity getClosestPlayerInSurvival(World world, BlockPos pos, @Nullable LivingEntity placer, double maxDistance) {
         double closestDistance = -1.0;
+        PlayerEntity playerPlacer = (PlayerEntity) placer;
         PlayerEntity playerEntity = null;
 
         for (PlayerEntity playerEntity2 : world.getPlayers()) {
-            if (!playerEntity2.isInCreativeMode() && !playerEntity2.isSpectator() && !playerEntity2.isInvisible()) {
+            if (!playerEntity2.isInCreativeMode() && !playerEntity2.isSpectator() && !playerEntity2.isInvisible() && !playerEntity2.equals(playerPlacer)) {
                 double squaredDistance = playerEntity2.squaredDistanceTo(pos.getX(), pos.getY(), pos.getZ());
-                if ((maxDistance < 0.0 || squaredDistance < maxDistance * maxDistance) && (squaredDistance == -1.0 || squaredDistance < closestDistance)) {
+                if ((maxDistance < 0.0 || squaredDistance < maxDistance * maxDistance) && (closestDistance == -1.0 || squaredDistance < closestDistance)) {
                     closestDistance = squaredDistance;
                     playerEntity = playerEntity2;
                 }
@@ -123,7 +124,13 @@ public class JerkSteveCameraBlock extends FacingBlock implements Waterloggable {
         }
 
         if (playerEntity == null) {
-            playerEntity = (PlayerEntity) placer;
+            playerEntity = playerPlacer;
+        }
+
+        if (playerEntity != null) {
+            JerkSteve.LOGGER.info("returning" + playerEntity.getName());
+        } else {
+            JerkSteve.LOGGER.info("returning null");
         }
 
         return playerEntity;
